@@ -28,7 +28,7 @@ export async function getRouteInfo(
   villeDepart: string,
   villeArrivee: string,
 ): Promise<{ ok: true; data: RouteInfo } | { ok: false; error: string }> {
-  const apiKey = process.env.NEXT_PUBLIC_HERE_API_KEY
+  const apiKey = process.env.HERE_API_KEY
   if (!apiKey) return { ok: false, error: 'HERE_API_KEY_MISSING' }
 
   const [posDepart, posArrivee] = await Promise.all([

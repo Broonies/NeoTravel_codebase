@@ -13,6 +13,7 @@ type DevisOutput = {
   reason?: string
   trajet?: { ville_depart: string; ville_arrivee: string; km: number }
   passagers?: number
+  aller_retour?: boolean
   dates?: { depart: string; arrivee: string; nb_nuits: number }
   prix?: { base: number; montant_ht: number; montant_tva: number; montant_ttc: number }
   coefficients?: { saisonnalite: number; capacite: number; delai: number }

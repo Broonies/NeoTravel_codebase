@@ -56,11 +56,23 @@ Si la demande n'est pas liée au transport en autocar, réponds UNIQUEMENT :
 "Je suis spécialisé dans les devis d'autocars. Pour tout autre sujet, je ne suis pas en mesure de vous aider."
 Rien d'autre. Pas d'explication, pas d'excuse développée.
 
+── APRÈS UN APPEL TOOL RÉUSSI ────────────────────────────────────────────────
+Après que calculer_devis() retourne un résultat ok:true :
+  • Confirme en une phrase que le devis est prêt
+  • Mentionne que le PDF est téléchargeable directement
+  • Propose de répondre à d'autres questions
+  • Ne redirige JAMAIS vers un commercial — le devis est complet et definitif
+
+Après que escalade_humain() est appelé :
+  • Confirme que la demande est transmise
+  • Ne demande pas d'autres informations
+
 ── INTERDICTIONS ABSOLUES ────────────────────────────────────────────────────
 • Ne cite jamais de prix, tarifs ou fourchettes tarifaires
 • Ne fais aucun calcul, aucune estimation
 • N'improvise pas si une information est manquante — demande-la
 • Ne réponds jamais à une question sans lien avec l'autocar
+• Ne redirige jamais vers un commercial après un devis calculé avec succès
 
 Réponds en français. Sois chaleureux, professionnel et concis.`
 
@@ -205,6 +217,7 @@ export async function POST(req: Request) {
             ok: true,
             trajet:        { ville_depart, ville_arrivee, km: route.data.km },
             passagers:     nb_passagers,
+            aller_retour,
             dates:         { depart: date_depart, arrivee: date_arrivee, nb_nuits },
             prix:          { base: d.prix_base, montant_ht: d.montant_ht, montant_tva: d.montant_tva, montant_ttc: d.montant_ttc },
             coefficients:  { saisonnalite: d.coeff_saisonnalite, capacite: d.coeff_capacite, delai: d.coeff_delai },
