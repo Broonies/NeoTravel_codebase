@@ -1,7 +1,7 @@
 'use server'
 
 import { differenceInCalendarDays } from 'date-fns'
-import { getMemoryRepos } from '@/lib/db/memory'
+import { getSupabaseRepos } from '@/lib/db/supabase'
 import { getRouteInfo } from '@/lib/pricing/here'
 import { calculerDevis } from '@/lib/pricing/calculer-devis'
 import { calculeUrgenceCode } from '@/lib/pricing/helpers'
@@ -53,9 +53,9 @@ export async function calculerDevisAction(input: DevisFormInput): Promise<DevisA
   const urgenceCode = calculeUrgenceCode(new Date(), new Date(input.date_depart))
   console.log(`\n⏱️  [2/4] Urgence : ${urgenceCode}`)
 
-  // ── Étape 3 : création de la demande (in-memory) ──────────────────────────
-  console.log('\n🗄️  [3/4] Création de la demande en mémoire...')
-  const repos = getMemoryRepos()
+  // ── Étape 3 : création de la demande (Supabase) ───────────────────────────
+  console.log('\n🗄️  [3/4] Création de la demande en base...')
+  const repos = getSupabaseRepos()
 
   const lead = await repos.leads.create({
     prenom: 'Test', nom: 'Formulaire', email: 'test@neotravel.fr',
@@ -81,7 +81,7 @@ export async function calculerDevisAction(input: DevisFormInput): Promise<DevisA
     type_statut: 'demande_qualifiee',
     commentaire: input.commentaire || undefined,
   })
-  console.log(`   Demande #${demande.id} créée (lead #${lead.id})`)
+  console.log(`   ✅ Demande #${demande.id} créée (lead #${lead.id})`)
 
   // ── Étape 4 : moteur de calcul ────────────────────────────────────────────
   console.log('\n🧮 [4/4] Moteur de calcul déterministe...')

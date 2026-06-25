@@ -10,7 +10,7 @@ import {
 import { gateway } from '@ai-sdk/gateway'
 import { z } from 'zod'
 import { differenceInCalendarDays } from 'date-fns'
-import { getMemoryRepos } from '@/lib/db/memory'
+import { getSupabaseRepos } from '@/lib/db/supabase'
 import { getRouteInfo } from '@/lib/pricing/here'
 import { calculerDevis } from '@/lib/pricing/calculer-devis'
 import { calculeUrgenceCode } from '@/lib/pricing/helpers'
@@ -178,7 +178,7 @@ export async function POST(req: Request) {
           console.log(`   ✅ ${route.data.km} km | péages ${peagesTotal} €`)
 
           const urgenceCode = calculeUrgenceCode(new Date(), new Date(date_depart))
-          const repos = getMemoryRepos()
+          const repos = getSupabaseRepos()
 
           const lead = await repos.leads.create({
             prenom: 'Client', nom: 'Chat', email: 'chat@neotravel.fr',
