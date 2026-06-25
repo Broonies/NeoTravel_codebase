@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.86",
+    "@ai-sdk/react": "^3.0.212",
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
