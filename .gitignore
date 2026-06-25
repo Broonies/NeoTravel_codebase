@@ -1,0 +1,22 @@
+# deps
+/node_modules
+
+# next
+/.next/
+/out/
+
+# env (JAMAIS committer les clés)
+.env
+.env.local
+.env.*.local
+
+# build
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
