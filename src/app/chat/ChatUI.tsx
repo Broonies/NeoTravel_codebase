@@ -31,6 +31,28 @@ function CoeffSpan({ v }: { v: number }) {
 }
 
 function DevisCard({ output }: { output: DevisOutput }) {
+  const [pdfLoading, setPdfLoading] = useState(false)
+
+  async function downloadPdf() {
+    setPdfLoading(true)
+    try {
+      const res = await fetch('/api/devis/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(output),
+      })
+      const blob = await res.blob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `devis-neotravel-${output.trajet?.ville_depart ?? 'devis'}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setPdfLoading(false)
+    }
+  }
+
   if (!output.ok) {
     return (
       <div className="mt-2 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
@@ -120,6 +142,14 @@ function DevisCard({ output }: { output: DevisOutput }) {
         </div>
         <p className="text-right text-xs text-blue-400">{output.mode}</p>
       </div>
+
+      <button
+        onClick={downloadPdf}
+        disabled={pdfLoading}
+        className="w-full mt-1 bg-black text-white rounded-lg py-2 text-xs font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
+      >
+        {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
+      </button>
     </div>
   )
 }

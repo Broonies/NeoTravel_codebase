@@ -127,7 +127,7 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: ({ usage, steps }) => {
-      console.log(`📊 Tokens — prompt: ${usage.promptTokens} | completion: ${usage.completionTokens} | total: ${usage.totalTokens} | steps: ${steps.length}`)
+      console.log(`📊 Tokens — input: ${usage.inputTokens} | output: ${usage.outputTokens} | steps: ${steps.length}`)
     },
     tools: {
 
