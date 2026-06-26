@@ -134,7 +134,7 @@ export async function POST(req: Request) {
 
   // LLM + tools
   const result = streamText({
-    model: gateway('anthropic/claude-haiku-4.5'),
+    model: gateway('anthropic/claude-3-haiku'),
     system: SYSTEM,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
@@ -230,19 +230,73 @@ export async function POST(req: Request) {
       escalade_humain: tool({
         description:
           'Déclenche une escalade vers un commercial humain (HITL). ' +
-          'Obligatoire si : nb_passagers > 85 OU ville de départ/arrivée hors France.',
+          'Obligatoire si : nb_passagers > 85 OU ville de départ/arrivée hors France. ' +
+          'Passe tout ce qui a été collecté jusque-là (villes, dates, passagers).',
         inputSchema: z.object({
-          raison:       z.string().describe("Raison précise de l'escalade"),
-          nb_passagers: z.number().optional().describe('Nombre de passagers si connu'),
-          nom_client:   z.string().optional(),
-          email_client: z.string().optional(),
+          raison:        z.string().describe("Raison précise de l'escalade"),
+          nb_passagers:  z.number().optional().describe('Nombre de passagers si connu'),
+          ville_depart:  z.string().optional().describe('Ville de départ si connue'),
+          ville_arrivee: z.string().optional().describe("Ville d'arrivée si connue"),
+          date_depart:   z.string().optional().describe('Date de départ (YYYY-MM-DD) si connue'),
+          date_arrivee:  z.string().optional().describe('Date de retour (YYYY-MM-DD) si connue'),
+          aller_retour:  z.boolean().optional().describe('Type de trajet si connu'),
+          nom_client:    z.string().optional(),
+          email_client:  z.string().optional(),
         }),
-        execute: async ({ raison, nb_passagers, nom_client, email_client }) => {
+        execute: async ({
+          raison, nb_passagers, ville_depart, ville_arrivee,
+          date_depart, date_arrivee, aller_retour, nom_client, email_client,
+        }) => {
           console.log(`\n🚨 [HITL] ${raison}`)
-          if (nb_passagers) console.log(`   Pax : ${nb_passagers}`)
-          if (nom_client)   console.log(`   Client : ${nom_client} (${email_client ?? 'email inconnu'})`)
+
+          const repos = getSupabaseRepos()
+
+          const lead = await repos.leads.create({
+            prenom:      nom_client?.split(' ')[0] ?? 'Inconnu',
+            nom:         nom_client?.split(' ').slice(1).join(' ') ?? 'Chat',
+            email:       email_client ?? 'hitl@neotravel.fr',
+            telephone:   '0600000000',
+            type_client: 'particulier',
+          })
+
+          const now = new Date()
+          const dateD = date_depart  ? new Date(date_depart)  : now
+          const dateA = date_arrivee ? new Date(date_arrivee) : dateD
+          const urgenceCode = date_depart
+            ? calculeUrgenceCode(now, dateD)
+            : 'DD_NORMAL'
+
+          // Score de complétude partiel
+          let score = 0
+          if (ville_depart)  score += 0.20
+          if (ville_arrivee) score += 0.20
+          if (date_depart)   score += 0.15
+          if (nb_passagers)  score += 0.15
+          if (aller_retour !== undefined && date_arrivee) score += 0.10
+          if (email_client)  score += 0.10
+          if (nom_client)    score += 0.10
+
+          const demande = await repos.demandes.create({
+            lead_id:         lead.id,
+            ville_depart:    ville_depart  ?? '',
+            ville_arrivee:   ville_arrivee ?? '',
+            date_depart:     dateD,
+            date_arrivee:    dateA,
+            aller_retour:    aller_retour  ?? false,
+            nb_passagers:    nb_passagers  ?? 0,
+            type_trajet:     'cas_complexe',
+            urgence_code:    urgenceCode,
+            details_json:    {},
+            score_completude: Math.round(score * 100) / 100,
+            type_statut:     'cas_complexe',
+            commentaire:     raison,
+          })
+
+          console.log(`   ✅ Demande HITL #${demande.id} persistée (lead #${lead.id}) — score ${Math.round(score * 100)} %`)
+
           return {
             ok: true,
+            demande_id: demande.id,
             message:
               "Votre demande a bien été transmise à notre équipe commerciale. " +
               "Un conseiller NeoTravel vous contactera dans les meilleurs délais (généralement sous 2h en horaires ouvrés).",
