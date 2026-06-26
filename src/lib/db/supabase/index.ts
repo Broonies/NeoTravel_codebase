@@ -7,7 +7,7 @@ import type {
   IMatriceRepo,
   AppRepos,
 } from '@/lib/db/repositories'
-import { supabase } from '@/lib/supabase/client'
+import { getSupabaseClient } from '@/lib/supabase/client'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -20,19 +20,19 @@ function toDate(v: unknown): Date {
 }
 
 async function insertOne<T extends Row>(table: string, data: Row): Promise<T> {
-  const { data: row, error } = await supabase.from(table).insert(data).select().single()
+  const { data: row, error } = await getSupabaseClient().from(table).insert(data).select().single()
   if (error) throw error
   return row as T
 }
 
 async function selectOne<T extends Row>(table: string, field: string, value: unknown): Promise<T | null> {
-  const { data, error } = await supabase.from(table).select().eq(field, value).single()
+  const { data, error } = await getSupabaseClient().from(table).select().eq(field, value).single()
   if (error) return null
   return data as T
 }
 
 async function updateOne<T extends Row>(table: string, id: number, patch: Row): Promise<T> {
-  const { data: row, error } = await supabase.from(table).update(patch).eq('id', id).select().single()
+  const { data: row, error } = await getSupabaseClient().from(table).update(patch).eq('id', id).select().single()
   if (error) throw error
   return row as T
 }
@@ -124,7 +124,7 @@ class SupabaseDevisRepo implements IDevisRepo {
   }
 
   async findByDemandeId(demande_id: number): Promise<Devis | null> {
-    const { data, error } = await supabase.from('devis').select().eq('demande_id', demande_id).maybeSingle()
+    const { data, error } = await getSupabaseClient().from('devis').select().eq('demande_id', demande_id).maybeSingle()
     if (error || !data) return null
     const row = data as Row
     return {
@@ -169,7 +169,7 @@ class SupabaseRelanceRepo implements IRelanceRepo {
   }
 
   async findByDevisId(devis_id: number): Promise<Relance[]> {
-    const { data, error } = await supabase.from('relances').select().eq('devis_id', devis_id)
+    const { data, error } = await getSupabaseClient().from('relances').select().eq('devis_id', devis_id)
     if (error || !data) return []
     return (data as Row[]).map(row => ({
       ...(row as unknown as Relance),
@@ -184,13 +184,13 @@ class SupabaseRelanceRepo implements IRelanceRepo {
 
 class SupabaseMatriceRepo implements IMatriceRepo {
   async findByType(type: MatriceType): Promise<Matrice[]> {
-    const { data, error } = await supabase.from('matrices').select().eq('type', type)
+    const { data, error } = await getSupabaseClient().from('matrices').select().eq('type', type)
     if (error || !data) return []
     return data as Matrice[]
   }
 
   async findAll(): Promise<Matrice[]> {
-    const { data, error } = await supabase.from('matrices').select()
+    const { data, error } = await getSupabaseClient().from('matrices').select()
     if (error || !data) return []
     return data as Matrice[]
   }
