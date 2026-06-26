@@ -5,7 +5,7 @@ import { DefaultChatTransport } from 'ai'
 import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 
-// ── Rendu d'un résultat de devis ──────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type DevisOutput = {
   ok: boolean
@@ -26,10 +26,11 @@ function pct(v: number) {
 }
 
 function CoeffSpan({ v }: { v: number }) {
-  const cls =
-    v > 0 ? 'text-red-600' : v < 0 ? 'text-green-600' : 'text-gray-400'
+  const cls = v > 0 ? 'text-rose-500' : v < 0 ? 'text-emerald-600' : 'text-slate-400'
   return <span className={cls}>{pct(v)}</span>
 }
+
+// ── DevisCard ─────────────────────────────────────────────────────────────────
 
 function DevisCard({ output }: { output: DevisOutput }) {
   const [pdfLoading, setPdfLoading] = useState(false)
@@ -56,8 +57,8 @@ function DevisCard({ output }: { output: DevisOutput }) {
 
   if (!output.ok) {
     return (
-      <div className="mt-2 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-        <span className="font-medium">Erreur : </span>
+      <div className="mt-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-sm text-rose-700">
+        <span className="font-semibold">Erreur : </span>
         {output.error}
         {output.reason ? ` — ${output.reason}` : ''}
       </div>
@@ -69,102 +70,116 @@ function DevisCard({ output }: { output: DevisOutput }) {
   const p = output.prix ?? { base: 0, montant_ht: 0, montant_tva: 0, montant_ttc: 0 }
 
   return (
-    <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm space-y-3">
-      <div className="font-semibold text-blue-900">
-        Devis — {output.trajet?.ville_depart} → {output.trajet?.ville_arrivee}
+    <div className="mt-3 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md text-sm">
+      <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3">
+        <div className="font-semibold text-white text-sm">
+          {output.trajet?.ville_depart} → {output.trajet?.ville_arrivee}
+        </div>
+        <div className="text-slate-400 text-xs mt-0.5">Devis NeoTravel</div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-blue-700">
-        <span>Distance</span>
-        <span className="text-right font-medium">{output.trajet?.km} km</span>
-        <span>Passagers</span>
-        <span className="text-right font-medium">{output.passagers}</span>
-        {(output.dates?.nb_nuits ?? 0) > 0 && (
-          <>
-            <span>Durée</span>
-            <span className="text-right font-medium">
-              {output.dates?.nb_nuits} nuit{(output.dates?.nb_nuits ?? 0) > 1 ? 's' : ''}
-            </span>
-          </>
-        )}
-      </div>
+      <div className="p-4 space-y-4">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'Distance', value: `${output.trajet?.km} km` },
+            { label: 'Passagers', value: `${output.passagers}` },
+            ...(( output.dates?.nb_nuits ?? 0) > 0
+              ? [{ label: 'Durée', value: `${output.dates?.nb_nuits} nuit${(output.dates?.nb_nuits ?? 0) > 1 ? 's' : ''}` }]
+              : [{ label: 'Type', value: output.aller_retour ? 'Aller/retour' : 'Aller simple' }]
+            ),
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-slate-50 rounded-xl p-2.5 text-center">
+              <div className="text-xs text-slate-400">{label}</div>
+              <div className="font-semibold text-slate-800 text-xs mt-0.5">{value}</div>
+            </div>
+          ))}
+        </div>
 
-      <div className="border-t border-blue-200 pt-2 space-y-1 text-xs text-blue-700">
-        <div className="flex justify-between">
-          <span>Prix de base</span>
-          <span className="font-medium">{p.base} €</span>
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between text-slate-500">
+            <span>Prix de base</span>
+            <span className="font-medium text-slate-700">{p.base} €</span>
+          </div>
+          <div className="flex justify-between text-slate-500">
+            <span>Saisonnalité</span>
+            <CoeffSpan v={c.saisonnalite} />
+          </div>
+          {c.capacite !== 0 && (
+            <div className="flex justify-between text-slate-500">
+              <span>Capacité</span>
+              <CoeffSpan v={c.capacite} />
+            </div>
+          )}
+          <div className="flex justify-between text-slate-500">
+            <span>Délai réservation</span>
+            <CoeffSpan v={c.delai} />
+          </div>
+          {s.peages > 0 && (
+            <div className="flex justify-between text-slate-500">
+              <span>Péages</span>
+              <span className="text-slate-700">+{s.peages} €</span>
+            </div>
+          )}
+          {s.nuit_chauffeur > 0 && (
+            <div className="flex justify-between text-slate-500">
+              <span>Nuit chauffeur</span>
+              <span className="text-slate-700">+{s.nuit_chauffeur} €</span>
+            </div>
+          )}
+          {s.guide > 0 && (
+            <div className="flex justify-between text-slate-500">
+              <span>Guide</span>
+              <span className="text-slate-700">+{s.guide} €</span>
+            </div>
+          )}
         </div>
-        <div className="flex justify-between">
-          <span>Saisonnalité</span>
-          <CoeffSpan v={c.saisonnalite} />
-        </div>
-        {c.capacite !== 0 && (
-          <div className="flex justify-between">
-            <span>Capacité</span>
-            <CoeffSpan v={c.capacite} />
-          </div>
-        )}
-        <div className="flex justify-between">
-          <span>Délai réservation</span>
-          <CoeffSpan v={c.delai} />
-        </div>
-        {s.peages > 0 && (
-          <div className="flex justify-between">
-            <span>Péages</span>
-            <span>+{s.peages} €</span>
-          </div>
-        )}
-        {s.nuit_chauffeur > 0 && (
-          <div className="flex justify-between">
-            <span>Nuit chauffeur</span>
-            <span>+{s.nuit_chauffeur} €</span>
-          </div>
-        )}
-        {s.guide > 0 && (
-          <div className="flex justify-between">
-            <span>Guide</span>
-            <span>+{s.guide} €</span>
-          </div>
-        )}
-      </div>
 
-      <div className="border-t border-blue-300 pt-2 space-y-1">
-        <div className="flex justify-between text-xs text-blue-700">
-          <span>Montant HT</span>
-          <span>{p.montant_ht} €</span>
+        <div className="border-t border-slate-100 pt-3 space-y-1 text-xs">
+          <div className="flex justify-between text-slate-400">
+            <span>Montant HT</span>
+            <span>{p.montant_ht} €</span>
+          </div>
+          <div className="flex justify-between text-slate-400">
+            <span>TVA (10 %)</span>
+            <span>{p.montant_tva} €</span>
+          </div>
+          <div className="flex justify-between font-bold text-slate-900 text-sm pt-1">
+            <span>Total TTC</span>
+            <span>{p.montant_ttc} €</span>
+          </div>
+          {output.mode && (
+            <p className="text-right text-slate-300 text-xs pt-0.5">{output.mode}</p>
+          )}
         </div>
-        <div className="flex justify-between text-xs text-blue-700">
-          <span>TVA (10 %)</span>
-          <span>{p.montant_tva} €</span>
-        </div>
-        <div className="flex justify-between font-bold text-blue-900">
-          <span>Total TTC</span>
-          <span>{p.montant_ttc} €</span>
-        </div>
-        <p className="text-right text-xs text-blue-400">{output.mode}</p>
-      </div>
 
-      <button
-        onClick={downloadPdf}
-        disabled={pdfLoading}
-        className="w-full mt-1 bg-black text-white rounded-lg py-2 text-xs font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
-      >
-        {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
-      </button>
+        <button
+          onClick={downloadPdf}
+          disabled={pdfLoading}
+          className="w-full bg-slate-900 text-white rounded-xl py-2.5 text-xs font-medium hover:bg-slate-700 disabled:opacity-40 transition-colors"
+        >
+          {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
+        </button>
+      </div>
     </div>
   )
 }
 
 function EscaladeCard({ output }: { output: { ok: boolean; message: string } }) {
   return (
-    <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-      <span className="font-medium">🚨 Escalade commerciale — </span>
+    <div className="mt-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800">
+      <span className="font-semibold">🚨 Escalade commerciale — </span>
       {output.message}
     </div>
   )
 }
 
-// ── Composant principal ───────────────────────────────────────────────────────
+// ── ChatUI ────────────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  'Paris → Lyon, 30 passagers, le 15 septembre',
+  'Marseille → Nice aller/retour, 50 personnes, 20 mars',
+  '100 personnes Paris → Bordeaux',
+]
 
 export default function ChatUI() {
   const [inputValue, setInputValue] = useState('')
@@ -173,6 +188,8 @@ export default function ChatUI() {
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   })
+
+  const isEmpty = messages.length === 0
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -186,156 +203,172 @@ export default function ChatUI() {
     setInputValue('')
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+  function handleExample(text: string) {
+    sendMessage({ text })
+  }
 
-      {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex items-center gap-3">
-        <Link href="/" className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-gray-800 transition-colors">
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+
+      {/* Header minimal */}
+      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex items-center gap-3">
+        <Link href="/" className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white text-xs font-bold hover:bg-slate-700 transition-colors shrink-0">
           N
         </Link>
-        <div>
-          <p className="font-semibold text-gray-900 text-sm">NeoTravel Assistant</p>
-          <p className="text-xs text-gray-400">Devis autocar · calcul déterministe</p>
+        <span className="font-semibold text-slate-800 text-sm">NeoTravel</span>
+
+        <div className="ml-auto flex items-center gap-2">
+          {/* Indicateur de statut */}
+          {status !== 'ready' && (
+            <span className="text-xs text-slate-400 flex items-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              {status === 'streaming' ? 'En cours…' : 'Envoi…'}
+            </span>
+          )}
+
+          {/* Bouton formulaire */}
+          <Link
+            href="/devis"
+            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Formulaire de devis
+          </Link>
         </div>
-        <span
-          className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-            status === 'ready'
-              ? 'bg-green-100 text-green-700'
-              : status === 'streaming'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-gray-100 text-gray-500'
-          }`}
-        >
-          {status === 'ready' ? 'Prêt' : status === 'streaming' ? 'En cours…' : 'Envoi…'}
-        </span>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 max-w-2xl mx-auto w-full">
+      {/* Zone messages — centrée */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-4 py-6 w-full">
 
-        {messages.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-4xl mb-3">🚌</p>
-            <p className="font-medium text-gray-600 text-lg">Bonjour ! Je suis l&apos;assistant NeoTravel.</p>
-            <p className="text-sm mt-2 max-w-sm mx-auto">
-              Décrivez votre projet de transport en autocar et je calculerai votre devis automatiquement.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {[
-                'Paris → Lyon, 30 passagers, le 15 septembre',
-                'Marseille → Nice aller/retour, 50 personnes, 20 mars',
-                '100 personnes Paris → Bordeaux',
-              ].map((example) => (
-                <button
-                  key={example}
-                  onClick={() => {
-                    sendMessage({ text: example })
-                  }}
-                  className="text-xs bg-white border rounded-full px-3 py-1.5 text-gray-600 hover:bg-gray-50 transition-colors"
-                >
-                  {example}
-                </button>
-              ))}
+          {/* Empty state */}
+          {isEmpty && (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+              <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-2xl mb-5 shadow-lg">
+                🚌
+              </div>
+              <h1 className="text-xl font-bold text-slate-800">Bonjour, je suis l&apos;assistant NeoTravel</h1>
+              <p className="text-sm text-slate-400 mt-2 max-w-xs">
+                Décrivez votre projet de transport en autocar, je calcule le devis instantanément.
+              </p>
+              <div className="mt-8 flex flex-col gap-2 w-full max-w-sm">
+                {EXAMPLES.map((ex) => (
+                  <button
+                    key={ex}
+                    onClick={() => handleExample(ex)}
+                    className="text-left text-sm bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-slate-600 transition-colors"
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className="max-w-[85%]">
-              {message.role === 'assistant' && (
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    N
-                  </div>
-                  <span className="text-xs text-gray-400">NeoTravel</span>
+          {/* Messages */}
+          <div className="space-y-5">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className="max-w-[85%]">
+                  {message.role === 'assistant' && (
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <div className="w-5 h-5 bg-slate-900 rounded-md flex items-center justify-center text-white text-xs font-bold">
+                        N
+                      </div>
+                      <span className="text-xs text-slate-400 font-medium">NeoTravel</span>
+                    </div>
+                  )}
+
+                  {message.parts.map((part, i) => {
+                    if (part.type === 'text' && part.text) {
+                      return (
+                        <div
+                          key={i}
+                          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                            message.role === 'user'
+                              ? 'bg-slate-900 text-white rounded-tr-sm shadow-sm'
+                              : 'bg-slate-50 border border-slate-100 text-slate-800 rounded-tl-sm'
+                          }`}
+                        >
+                          {part.text}
+                        </div>
+                      )
+                    }
+
+                    if (part.type === 'tool-calculer_devis') {
+                      if (part.state === 'output-available') {
+                        return <DevisCard key={i} output={part.output as DevisOutput} />
+                      }
+                      return (
+                        <div key={i} className="mt-2 text-xs text-slate-400 italic flex items-center gap-1.5">
+                          <span className="animate-pulse">⏳</span> Calcul du devis en cours…
+                        </div>
+                      )
+                    }
+
+                    if (part.type === 'tool-escalade_humain') {
+                      if (part.state === 'output-available') {
+                        return (
+                          <EscaladeCard
+                            key={i}
+                            output={part.output as { ok: boolean; message: string }}
+                          />
+                        )
+                      }
+                      return (
+                        <div key={i} className="mt-2 text-xs text-slate-400 italic flex items-center gap-1.5">
+                          <span className="animate-pulse">⏳</span> Escalade en cours…
+                        </div>
+                      )
+                    }
+
+                    return null
+                  })}
                 </div>
-              )}
+              </div>
+            ))}
 
-              {message.parts.map((part, i) => {
-                if (part.type === 'text' && part.text) {
-                  return (
-                    <div
-                      key={i}
-                      className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                        message.role === 'user'
-                          ? 'bg-black text-white rounded-tr-sm'
-                          : 'bg-white border text-gray-800 rounded-tl-sm'
-                      }`}
-                    >
-                      {part.text}
-                    </div>
-                  )
-                }
+            {status === 'submitted' && (
+              <div className="flex justify-start">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1">
+                  <span className="animate-bounce text-slate-400" style={{ animationDelay: '0ms' }}>•</span>
+                  <span className="animate-bounce text-slate-400" style={{ animationDelay: '150ms' }}>•</span>
+                  <span className="animate-bounce text-slate-400" style={{ animationDelay: '300ms' }}>•</span>
+                </div>
+              </div>
+            )}
 
-                if (part.type === 'tool-calculer_devis') {
-                  if (part.state === 'output-available') {
-                    return <DevisCard key={i} output={part.output as DevisOutput} />
-                  }
-                  return (
-                    <div key={i} className="mt-2 text-xs text-gray-400 italic flex items-center gap-1">
-                      <span className="animate-pulse">⏳</span> Calcul du devis en cours…
-                    </div>
-                  )
-                }
-
-                if (part.type === 'tool-escalade_humain') {
-                  if (part.state === 'output-available') {
-                    return (
-                      <EscaladeCard
-                        key={i}
-                        output={part.output as { ok: boolean; message: string }}
-                      />
-                    )
-                  }
-                  return (
-                    <div key={i} className="mt-2 text-xs text-gray-400 italic flex items-center gap-1">
-                      <span className="animate-pulse">⏳</span> Escalade en cours…
-                    </div>
-                  )
-                }
-
-                return null
-              })}
-            </div>
+            <div ref={bottomRef} />
           </div>
-        ))}
-
-        {status === 'submitted' && (
-          <div className="flex justify-start">
-            <div className="bg-white border rounded-2xl rounded-tl-sm px-4 py-3 text-gray-400 flex gap-1">
-              <span className="animate-bounce" style={{ animationDelay: '0ms' }}>•</span>
-              <span className="animate-bounce" style={{ animationDelay: '150ms' }}>•</span>
-              <span className="animate-bounce" style={{ animationDelay: '300ms' }}>•</span>
-            </div>
-          </div>
-        )}
-
-        <div ref={bottomRef} />
+        </div>
       </div>
 
-      {/* Input */}
-      <div className="bg-white border-t px-4 py-4">
+      {/* Input ancré en bas */}
+      <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 py-4">
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto flex gap-2">
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Décrivez votre trajet (ex : Paris → Lyon, 40 passagers, le 15 mars)…"
+            placeholder="Ex : Paris → Lyon, 40 passagers, le 15 mars…"
             disabled={status !== 'ready'}
-            className="flex-1 border rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-40"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white disabled:opacity-40 transition-all"
           />
           <button
             type="submit"
             disabled={status !== 'ready' || !inputValue.trim()}
-            className="bg-black text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
+            className="bg-slate-900 text-white rounded-xl px-5 py-3 text-sm font-medium hover:bg-slate-700 disabled:opacity-40 transition-colors shrink-0"
           >
-            Envoyer
+            ↑
           </button>
         </form>
+        <p className="text-center text-xs text-slate-300 mt-2">
+          NeoTravel · Devis autocar déterministe
+        </p>
       </div>
 
     </div>
