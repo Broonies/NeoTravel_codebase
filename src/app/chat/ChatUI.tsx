@@ -236,6 +236,17 @@ export default function ChatUI() {
             </svg>
             Formulaire de devis
           </Link>
+
+          {/* Bouton dashboard */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
+            </svg>
+            Dashboard
+          </Link>
         </div>
       </header>
 

@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation'
+import ChatUI from './ChatUI'
+
+export const metadata = { title: 'NeoTravel — Assistant devis' }
 
 export default function ChatPage() {
-  redirect('/')
+  return <ChatUI />
 }
