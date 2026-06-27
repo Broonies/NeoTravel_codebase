@@ -6,6 +6,7 @@ import { getRouteInfo } from '@/lib/pricing/here'
 import { calculerDevis } from '@/lib/pricing/calculer-devis'
 import { calculeUrgenceCode } from '@/lib/pricing/helpers'
 import type { DevisData } from '@/lib/types'
+import { persisterDevis } from '@/lib/services/persister-devis'
 
 export interface DevisFormInput {
   ville_depart: string
@@ -27,7 +28,7 @@ export interface SupplementDetail {
 }
 
 export type DevisActionResult =
-  | { ok: true; devis: DevisData; km: number; peages: number; supplement_detail: SupplementDetail }
+  | { ok: true; devis: DevisData; km: number; peages: number; supplement_detail: SupplementDetail; pdf_url: string | null }
   | { ok: false; error: string }
 
 export async function calculerDevisAction(input: DevisFormInput): Promise<DevisActionResult> {
@@ -57,30 +58,33 @@ export async function calculerDevisAction(input: DevisFormInput): Promise<DevisA
   console.log('\n🗄️  [3/4] Création de la demande en base...')
   const repos = getSupabaseRepos()
 
-  const lead = await repos.leads.create({
-    prenom: 'Test', nom: 'Formulaire', email: 'test@neotravel.fr',
-    telephone: '0600000000', type_client: 'particulier',
-  })
-
-  const demande = await repos.demandes.create({
-    lead_id: lead.id,
-    ville_depart: input.ville_depart,
-    ville_arrivee: input.ville_arrivee,
-    date_depart: new Date(input.date_depart),
-    date_arrivee: new Date(input.date_arrivee),
-    aller_retour: input.aller_retour,
-    nb_passagers: input.nb_passagers,
-    type_trajet: 'standard',
-    urgence_code: urgenceCode,
-    details_json: {
-      km_distance: route.data.km,
-      peages: peagesTotal,
-      guide: input.guide,
-    },
-    score_completude: 1.0,
-    type_statut: 'demande_qualifiee',
-    commentaire: input.commentaire || undefined,
-  })
+  let lead: Awaited<ReturnType<typeof repos.leads.create>>
+  let demande: Awaited<ReturnType<typeof repos.demandes.create>>
+  try {
+    lead = await repos.leads.create({
+      prenom: 'Test', nom: 'Formulaire', email: process.env.DEV_LEAD_EMAIL ?? 'test@neotravel.fr',
+      telephone: '0600000000', type_client: 'particulier',
+    })
+    demande = await repos.demandes.create({
+      lead_id: lead.id,
+      ville_depart: input.ville_depart,
+      ville_arrivee: input.ville_arrivee,
+      date_depart: new Date(input.date_depart),
+      date_arrivee: new Date(input.date_arrivee),
+      aller_retour: input.aller_retour,
+      nb_passagers: input.nb_passagers,
+      type_trajet: 'standard',
+      urgence_code: urgenceCode,
+      details_json: { km_distance: route.data.km, peages: peagesTotal, guide: input.guide },
+      score_completude: 1.0,
+      type_statut: 'demande_qualifiee',
+      commentaire: input.commentaire || undefined,
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err)
+    console.error('   ❌ Supabase insert error:', msg)
+    return { ok: false, error: `Erreur base de données : ${msg}` }
+  }
   console.log(`   ✅ Demande #${demande.id} créée (lead #${lead.id})`)
 
   // ── Étape 4 : moteur de calcul ────────────────────────────────────────────
@@ -117,7 +121,25 @@ export async function calculerDevisAction(input: DevisFormInput): Promise<DevisA
   console.log(`   Montant HT     : ${d.montant_ht} €`)
   console.log(`   TVA 10 %       : ${d.montant_tva} €`)
   console.log(`   Montant TTC    : ${d.montant_ttc} €`)
-  console.log('─'.repeat(52) + '\n')
 
-  return { ok: true, devis: d, km: route.data.km, peages: peagesTotal, supplement_detail }
+  // ── Étape 5 : persistance devis + PDF ────────────────────────────────────
+  console.log('\n💾 [5/5] Persistance devis + PDF...')
+  let pdfUrl: string | null = null
+  try {
+    pdfUrl = await persisterDevis({
+      demandeId:    demande.id,
+      calcul:       d,
+      trajet:       { ville_depart: input.ville_depart, ville_arrivee: input.ville_arrivee, km: route.data.km },
+      dates:        { depart: input.date_depart, arrivee: input.date_arrivee, nb_nuits },
+      passagers:    input.nb_passagers,
+      aller_retour: input.aller_retour,
+      supplements:  { peages: peagesTotal, nuit_chauffeur: supplement_detail.nuit_chauffeur, guide: supplement_detail.guide },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : JSON.stringify(err)
+    console.error('   ⚠️  Persistance non-bloquante :', msg)
+  }
+
+  console.log('─'.repeat(52) + '\n')
+  return { ok: true, devis: d, km: route.data.km, peages: peagesTotal, supplement_detail, pdf_url: pdfUrl }
 }

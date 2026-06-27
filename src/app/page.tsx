@@ -26,6 +26,14 @@ export default function Home() {
             <div className="font-semibold">Formulaire de devis</div>
             <div className="text-sm text-gray-500 mt-0.5">Saisie manuelle · calcul déterministe</div>
           </Link>
+
+          <Link
+            href="/dashboard"
+            className="block bg-white border border-dashed text-gray-500 rounded-xl px-6 py-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="font-semibold text-gray-700">Dashboard Sales</div>
+            <div className="text-sm text-gray-400 mt-0.5">Dossiers urgents · vue commerciale</div>
+          </Link>
         </div>
       </div>
     </main>

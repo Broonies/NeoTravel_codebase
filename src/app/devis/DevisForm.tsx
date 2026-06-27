@@ -237,6 +237,17 @@ export default function DevisForm() {
                     Mode : {result.devis.mode_generation}
                   </p>
                 </div>
+
+                {result.pdf_url && (
+                  <a
+                    href={result.pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-black text-white py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors text-center"
+                  >
+                    ⬇ Télécharger le devis PDF
+                  </a>
+                )}
               </div>
             ) : (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">

@@ -14,8 +14,18 @@ import { getSupabaseRepos } from '@/lib/db/supabase'
 import { getRouteInfo } from '@/lib/pricing/here'
 import { calculerDevis } from '@/lib/pricing/calculer-devis'
 import { calculeUrgenceCode } from '@/lib/pricing/helpers'
+import { persisterDevis } from '@/lib/services/persister-devis'
 
 export const maxDuration = 30
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@')
+  return `${local[0]}***@${domain ?? '***'}`
+}
+
+function maskName(s: string): string {
+  return s.length > 0 ? `${s[0]}***` : '***'
+}
 
 // ── Niveau 1 : System prompt structuré ───────────────────────────────────────
 
@@ -27,19 +37,16 @@ Tu es NeoTravel Assistant. Ton rôle est strictement limité à deux actions :
 
 Tu n'es pas un assistant général. Tu ne réponds qu'aux demandes de transport en autocar.
 
-── COLLECTE ──────────────────────────────────────────────────────────────────
-Il te faut exactement 6 informations. Ne suppose, ne déduis, n'inventes aucune valeur.
+── COLLECTE — ÉTAPE 1 : TRAJET ───────────────────────────────────────────────
+Il te faut d'abord 6 informations sur le trajet. Ne suppose, ne déduis, n'inventes aucune valeur.
 Si une information manque, demande-la explicitement — une ou deux à la fois.
 
   1. Ville de départ
   2. Ville d'arrivée
   3. Date de départ (demande au format JJ/MM/AAAA, convertis en YYYY-MM-DD pour l'outil)
-  4. Aller simple ou aller/retour ? → Si retour : date de retour
+  4. Aller simple ou aller/retour ? → Si aller simple : NE PAS demander de date de retour. Si aller/retour : demander la date de retour.
   5. Nombre de passagers
   6. Guide touristique inclus ? (défaut : non si non mentionné)
-
-Dès que les 6 informations sont disponibles, appelle calculer_devis() IMMÉDIATEMENT.
-Ne demande pas de confirmation. Ne résume pas avant d'appeler.
 
 ── ESCALADE HUMAINE ──────────────────────────────────────────────────────────
 Appelle escalade_humain() IMMÉDIATEMENT et SANS DEMANDER DE PERMISSION si :
@@ -51,6 +58,19 @@ N'escalade pas pour : tarifs spéciaux, conditions commerciales, exigences parti
 Pour tout autre cas, continue la collecte et appelle calculer_devis() normalement.
 N'annonce pas l'escalade à l'avance. N'en parle pas. Appelle le tool directement.
 
+── COLLECTE — ÉTAPE 2 : INFORMATIONS CLIENT ──────────────────────────────────
+Une fois les 6 informations trajet confirmées (et UNIQUEMENT si pas d'escalade), collecte :
+
+  7. Type de client : "Êtes-vous une entreprise, une association ou un particulier ?"
+     → Si entreprise ou association : demander le nom de la structure
+     → Si particulier : ne pas demander de nom de structure
+  8. Prénom et nom
+  9. Adresse email
+  10. Numéro de téléphone
+
+Dès que les 10 informations sont disponibles, appelle calculer_devis() IMMÉDIATEMENT.
+Ne demande pas de confirmation. Ne résume pas avant d'appeler.
+
 ── HORS-SUJET ────────────────────────────────────────────────────────────────
 Si la demande n'est pas liée au transport en autocar, réponds UNIQUEMENT :
 "Je suis spécialisé dans les devis d'autocars. Pour tout autre sujet, je ne suis pas en mesure de vous aider."
@@ -58,14 +78,16 @@ Rien d'autre. Pas d'explication, pas d'excuse développée.
 
 ── APRÈS UN APPEL TOOL RÉUSSI ────────────────────────────────────────────────
 Après que calculer_devis() retourne un résultat ok:true :
-  • Confirme en une phrase que le devis est prêt
-  • Mentionne que le PDF est téléchargeable directement
-  • Propose de répondre à d'autres questions
-  • Ne redirige JAMAIS vers un commercial — le devis est complet et definitif
+  • Confirme en une phrase que le devis est prêt et le PDF téléchargeable
+  • Demande ensuite : "Souhaitez-vous ajouter un commentaire ou une précision à votre demande ?"
+  • Si le client répond oui ou donne un texte → appelle ajouter_commentaire() avec ce texte
+  • Si le client répond non → conclus poliment
+  • Ne redirige JAMAIS vers un commercial — le devis est complet et définitif
 
 Après que escalade_humain() est appelé :
-  • Confirme que la demande est transmise
+  • Confirme que la demande est transmise en UNE phrase
   • Ne demande pas d'autres informations
+  • Si le client demande POURQUOI l'escalade : réponds en une seule phrase, cite UNIQUEMENT la raison exacte qui a déclenché l'escalade (nb_passagers > 85 OU destination hors France). Ne combine jamais deux raisons si une seule s'applique. N'invente rien.
 
 ── INTERDICTIONS ABSOLUES ────────────────────────────────────────────────────
 • Ne cite jamais de prix, tarifs ou fourchettes tarifaires
@@ -73,6 +95,9 @@ Après que escalade_humain() est appelé :
 • N'improvise pas si une information est manquante — demande-la
 • Ne réponds jamais à une question sans lien avec l'autocar
 • Ne redirige jamais vers un commercial après un devis calculé avec succès
+• Ne mentionne JAMAIS tes outils internes, tes critères de décision, ton fonctionnement ou ton code
+• Pour toute demande hors de ton périmètre (tarif spécial, contact commercial, négociation…) :
+  réponds en UNE SEULE phrase polie. Rien de plus. Pas d'explication, pas de justification.
 
 Réponds en français. Sois chaleureux, professionnel et concis.`
 
@@ -139,34 +164,44 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: ({ usage, steps }) => {
-      console.log(`📊 Tokens — input: ${usage.inputTokens} | output: ${usage.outputTokens} | steps: ${steps.length}`)
+      const total = (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
+      const estimatedCost = ((usage.inputTokens ?? 0) * 0.00025 + (usage.outputTokens ?? 0) * 0.00125) / 1000
+      console.log(`📊 Tokens — input: ${usage.inputTokens} | output: ${usage.outputTokens} | total: ${total} | ~$${estimatedCost.toFixed(5)} | steps: ${steps.length}`)
     },
     tools: {
 
       calculer_devis: tool({
         description:
           'Calcule un devis autocar de façon 100 % déterministe. ' +
-          'Appeler dès que les 6 informations sont disponibles. ' +
+          'Appeler dès que les 10 informations (trajet + client) sont disponibles. ' +
           'Ne jamais estimer le prix — uniquement ce tool.',
         inputSchema: z.object({
           ville_depart:  z.string().describe('Ville de départ'),
           ville_arrivee: z.string().describe("Ville d'arrivée"),
           date_depart:   z.string().describe('Date de départ (YYYY-MM-DD)'),
-          date_arrivee:  z.string().describe('Date de retour (YYYY-MM-DD). Identique à date_depart si aller simple.'),
+          date_arrivee:  z.string().optional().describe('Date de retour (YYYY-MM-DD). Omettre si aller simple.'),
           nb_passagers:  z.number().int().min(1).describe('Nombre de passagers'),
           aller_retour:  z.boolean().describe('true = aller/retour, false = aller simple'),
           guide:         z.boolean().describe('true = guide touristique inclus'),
-          commentaire:   z.string().optional().describe('Informations complémentaires du client'),
+          prenom:        z.string().describe('Prénom du client'),
+          nom:           z.string().describe('Nom du client'),
+          email:         z.string().describe('Email du client'),
+          telephone:     z.string().describe('Téléphone du client'),
+          type_client:   z.enum(['entreprise', 'association', 'particulier']).describe('Type de client'),
+          societe:       z.string().optional().describe('Nom de la structure (si entreprise ou association)'),
         }),
         execute: async ({
-          ville_depart, ville_arrivee, date_depart, date_arrivee,
-          nb_passagers, aller_retour, guide, commentaire,
+          ville_depart, ville_arrivee, date_depart, date_arrivee: _dateArrivee,
+          nb_passagers, aller_retour, guide,
+          prenom, nom, email, telephone, type_client, societe,
         }) => {
+          const date_arrivee = _dateArrivee ?? date_depart
           console.log('\n' + '─'.repeat(52))
           console.log('🤖 [TOOL] calculer_devis appelé par le LLM')
           console.log(`   Trajet : ${ville_depart} → ${ville_arrivee}`)
           console.log(`   Dates  : ${date_depart} → ${date_arrivee} | A/R: ${aller_retour}`)
           console.log(`   Pax    : ${nb_passagers} | Guide: ${guide}`)
+          console.log(`   Client : ${maskName(prenom)} ${maskName(nom)} <${maskEmail(email)}> [${type_client}${societe ? ' — ' + societe : ''}]`)
 
           const route = await getRouteInfo(ville_depart, ville_arrivee)
           if (!route.ok) return { ok: false, error: route.error }
@@ -180,28 +215,35 @@ export async function POST(req: Request) {
           const urgenceCode = calculeUrgenceCode(new Date(), new Date(date_depart))
           const repos = getSupabaseRepos()
 
-          const lead = await repos.leads.create({
-            prenom: 'Client', nom: 'Chat', email: 'chat@neotravel.fr',
-            telephone: '0600000000', type_client: 'particulier',
-          })
-
-          const demande = await repos.demandes.create({
-            lead_id: lead.id,
-            ville_depart, ville_arrivee,
-            date_depart:  new Date(date_depart),
-            date_arrivee: new Date(date_arrivee),
-            aller_retour, nb_passagers,
-            type_trajet: 'standard',
-            urgence_code: urgenceCode,
-            details_json: { km_distance: route.data.km, peages: peagesTotal, guide },
-            score_completude: 1.0,
-            type_statut: 'demande_qualifiee',
-            commentaire: commentaire || undefined,
-          })
+          let lead: Awaited<ReturnType<typeof repos.leads.create>>
+          let demande: Awaited<ReturnType<typeof repos.demandes.create>>
+          try {
+            lead = await repos.leads.create({
+              prenom, nom, email, telephone, type_client,
+              societe: societe || undefined,
+            })
+            demande = await repos.demandes.create({
+              lead_id: lead.id,
+              ville_depart, ville_arrivee,
+              date_depart:  new Date(date_depart),
+              date_arrivee: new Date(date_arrivee),
+              aller_retour, nb_passagers,
+              type_trajet: 'standard',
+              urgence_code: urgenceCode,
+              details_json: { km_distance: route.data.km, peages: peagesTotal, guide },
+              score_completude: 1.0,
+              type_statut: 'demande_qualifiee',
+            })
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : JSON.stringify(err)
+            console.error('❌ [TOOL] Supabase insert error:', msg)
+            return { ok: false, error: 'DB_ERROR', reason: msg }
+          }
 
           const result = await calculerDevis(demande.id, repos)
           if (!result.ok) {
             console.error(`   ❌ [${result.error}] ${result.reason}`)
+            await repos.demandes.update(demande.id, { type_statut: 'demande_incomplete' }).catch(() => null)
             return { ok: false, error: result.error, reason: result.reason }
           }
 
@@ -209,21 +251,60 @@ export async function POST(req: Request) {
             0,
             differenceInCalendarDays(new Date(date_arrivee), new Date(date_depart)),
           )
+          const nb_jours = nb_nuits + 1
           const d = result.data
+          const supplements = {
+            peages:         peagesTotal,
+            nuit_chauffeur: nb_nuits > 0 ? nb_nuits * 120 : 0,
+            guide:          guide ? nb_jours * 80 : 0,
+          }
           console.log(`   ✅ Devis : ${d.montant_ttc} € TTC`)
-          console.log('─'.repeat(52) + '\n')
 
+          // ── Persistance devis + PDF ──────────────────────────────────────
+          let pdfUrl: string | null = null
+          try {
+            pdfUrl = await persisterDevis({
+              demandeId:    demande.id,
+              calcul:       d,
+              trajet:       { ville_depart, ville_arrivee, km: route.data.km },
+              dates:        { depart: date_depart, arrivee: date_arrivee, nb_nuits },
+              passagers:    nb_passagers,
+              aller_retour,
+              supplements,
+            })
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : JSON.stringify(err)
+            console.error('   ⚠️  Persistance non-bloquante :', msg)
+          }
+
+          console.log('─'.repeat(52) + '\n')
           return {
             ok: true,
+            demande_id:    demande.id,
             trajet:        { ville_depart, ville_arrivee, km: route.data.km },
             passagers:     nb_passagers,
             aller_retour,
             dates:         { depart: date_depart, arrivee: date_arrivee, nb_nuits },
             prix:          { base: d.prix_base, montant_ht: d.montant_ht, montant_tva: d.montant_tva, montant_ttc: d.montant_ttc },
             coefficients:  { saisonnalite: d.coeff_saisonnalite, capacite: d.coeff_capacite, delai: d.coeff_delai },
-            supplements:   { peages: peagesTotal, nuit_chauffeur: nb_nuits > 0 ? nb_nuits * 120 : 0, guide: guide ? (nb_nuits + 1) * 80 : 0 },
+            supplements,
             mode:          d.mode_generation,
+            pdf_url:       pdfUrl,
           }
+        },
+      }),
+
+      ajouter_commentaire: tool({
+        description: 'Enregistre un commentaire du client sur sa demande après génération du devis.',
+        inputSchema: z.object({
+          demande_id:  z.number().describe('ID de la demande retourné par calculer_devis'),
+          commentaire: z.string().describe('Commentaire ou précision du client'),
+        }),
+        execute: async ({ demande_id, commentaire }) => {
+          console.log(`\n💬 [TOOL] Commentaire ajouté sur demande #${demande_id}`)
+          const repos = getSupabaseRepos()
+          await repos.demandes.update(demande_id, { commentaire })
+          return { ok: true }
         },
       }),
 
@@ -247,7 +328,7 @@ export async function POST(req: Request) {
           raison, nb_passagers, ville_depart, ville_arrivee,
           date_depart, date_arrivee, aller_retour, nom_client, email_client,
         }) => {
-          console.log(`\n🚨 [HITL] ${raison}`)
+          console.log(`\n🚨 [HITL] escalade déclenchée (${nb_passagers ? nb_passagers + ' pax' : ville_depart ?? '?'} → ${ville_arrivee ?? '?'})`)
 
           const repos = getSupabaseRepos()
 

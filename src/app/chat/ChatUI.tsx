@@ -19,6 +19,7 @@ type DevisOutput = {
   coefficients?: { saisonnalite: number; capacite: number; delai: number }
   supplements?: { peages: number; nuit_chauffeur: number; guide: number }
   mode?: string
+  pdf_url?: string | null
 }
 
 function pct(v: number) {
@@ -144,13 +145,24 @@ function DevisCard({ output }: { output: DevisOutput }) {
         <p className="text-right text-xs text-blue-400">{output.mode}</p>
       </div>
 
-      <button
-        onClick={downloadPdf}
-        disabled={pdfLoading}
-        className="w-full mt-1 bg-black text-white rounded-lg py-2 text-xs font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
-      >
-        {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
-      </button>
+      {output.pdf_url ? (
+        <a
+          href={output.pdf_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full mt-1 bg-black text-white rounded-lg py-2 text-xs font-medium hover:bg-gray-800 transition-colors text-center"
+        >
+          ⬇ Télécharger le devis PDF
+        </a>
+      ) : (
+        <button
+          onClick={downloadPdf}
+          disabled={pdfLoading}
+          className="w-full mt-1 bg-black text-white rounded-lg py-2 text-xs font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
+        >
+          {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
+        </button>
+      )}
     </div>
   )
 }
