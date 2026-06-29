@@ -3,25 +3,22 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 let _client: SupabaseClient | null = null
 
 function createFallbackClient(): SupabaseClient {
+  const emptyList  = { data: [] as unknown[], error: null, count: 0 }
+  const emptyOne   = { data: null, error: null }
+  const makeSelect = () => Object.assign(Promise.resolve(emptyList), {
+    eq: () => ({
+      single:      () => Promise.resolve(emptyOne),
+      maybeSingle: () => Promise.resolve(emptyOne),
+      select:      () => Promise.resolve(emptyList),
+    }),
+    in:  () => ({ order: () => ({ order: () => Promise.resolve(emptyList) }) }),
+    order: () => ({ order: () => Promise.resolve(emptyList) }),
+    single:      () => Promise.resolve(emptyOne),
+    maybeSingle: () => Promise.resolve(emptyOne),
+  })
   return {
     from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.resolve({ data: null, error: null }),
-          maybeSingle: () => Promise.resolve({ data: null, error: null }),
-          select: () => Promise.resolve({ data: [], error: null, count: 0 }),
-        }),
-        in: () => ({
-          order: () => ({
-            order: () => Promise.resolve({ data: [], error: null, count: 0 }),
-          }),
-        }),
-        order: () => ({
-          order: () => Promise.resolve({ data: [], error: null, count: 0 }),
-        }),
-        single: () => Promise.resolve({ data: null, error: null }),
-        maybeSingle: () => Promise.resolve({ data: null, error: null }),
-      }),
+      select: makeSelect,
       insert: () => Promise.resolve({ data: null, error: null }),
       update: () => Promise.resolve({ data: null, error: null }),
       delete: () => Promise.resolve({ data: null, error: null }),

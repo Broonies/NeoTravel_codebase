@@ -135,11 +135,17 @@ describe('calculeUrgenceCode', () => {
   it('départ demain (1j) → DD_PRIORITAIRE', () => {
     expect(calculeUrgenceCode(today, new Date('2026-06-26'))).toBe('DD_PRIORITAIRE')
   })
-  it('départ dans 3j → DD_URGENT', () => {
-    expect(calculeUrgenceCode(today, new Date('2026-06-28'))).toBe('DD_URGENT')
+  it('départ dans 3j → DD_PRIORITAIRE (< 8j)', () => {
+    expect(calculeUrgenceCode(today, new Date('2026-06-28'))).toBe('DD_PRIORITAIRE')
   })
-  it('départ dans 7j → DD_URGENT', () => {
-    expect(calculeUrgenceCode(today, new Date('2026-07-02'))).toBe('DD_URGENT')
+  it('départ dans 7j → DD_PRIORITAIRE (limite haute 0-7j)', () => {
+    expect(calculeUrgenceCode(today, new Date('2026-07-02'))).toBe('DD_PRIORITAIRE')
+  })
+  it('départ dans 8j → DD_URGENT (début tranche 8-14j)', () => {
+    expect(calculeUrgenceCode(today, new Date('2026-07-03'))).toBe('DD_URGENT')
+  })
+  it('départ dans 14j → DD_URGENT (fin tranche 8-14j)', () => {
+    expect(calculeUrgenceCode(today, new Date('2026-07-09'))).toBe('DD_URGENT')
   })
   it('départ dans 30j → DD_NORMAL', () => {
     expect(calculeUrgenceCode(today, new Date('2026-07-25'))).toBe('DD_NORMAL')
