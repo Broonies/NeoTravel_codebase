@@ -183,6 +183,8 @@ const EXAMPLES = [
 
 export default function ChatUI() {
   const [inputValue, setInputValue] = useState('')
+  const [lastDevis, setLastDevis] = useState<DevisOutput | null>(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { messages, sendMessage, status } = useChat({
@@ -193,6 +195,18 @@ export default function ChatUI() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Extrait le dernier devis réussi pour le panel droit
+  useEffect(() => {
+    for (const msg of [...messages].reverse()) {
+      for (const part of [...msg.parts].reverse()) {
+        if (part.type === 'tool-calculer_devis' && part.state === 'output-available') {
+          const output = part.output as DevisOutput
+          if (output.ok) { setLastDevis(output); return }
+        }
+      }
+    }
   }, [messages])
 
   function handleSubmit(e: React.FormEvent) {
@@ -235,17 +249,6 @@ export default function ChatUI() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Formulaire de devis
-          </Link>
-
-          {/* Bouton dashboard */}
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
-            </svg>
-            Dashboard
           </Link>
         </div>
       </header>
