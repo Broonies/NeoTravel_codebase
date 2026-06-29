@@ -162,7 +162,7 @@ export async function POST(req: Request) {
 
   // LLM + tools
   const result = streamText({
-    model: gateway('anthropic/claude-3-5-sonnet'),
+    model: gateway('anthropic/claude-3-5-sonnet-20241022'),
     system: SYSTEM,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(2),
