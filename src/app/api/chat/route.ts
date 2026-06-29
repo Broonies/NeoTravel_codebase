@@ -223,6 +223,10 @@ export async function POST(req: Request) {
           const route = await getRouteInfo(ville_depart, ville_arrivee)
           if (!route.ok) return { ok: false, error: route.error }
 
+          if (aller_retour && route.data.km > 350 && _dateArrivee === safeDepart) {
+            return { ok: false, error: 'DATE_RETOUR_J1_REQUIS', reason: `Trajet de ${route.data.km} km : une nuit de chauffeur est obligatoire au-delà de 350 km. La date de retour doit être au moins le lendemain du départ.` }
+          }
+
           const peagesTotal = aller_retour
             ? Math.round(route.data.peages * 2 * 100) / 100
             : route.data.peages
