@@ -99,11 +99,11 @@ export function calculeSupplements(
 
 export function calculeUrgenceCode(date_demande: Date, date_depart: Date): UrgenceCode {
   const jours = differenceInCalendarDays(date_depart, date_demande)
-  if (jours < 0) return 'DD_NORMAL'
-  if (jours < 2) return 'DD_PRIORITAIRE'
-  if (jours <= 7) return 'DD_URGENT'
-  if (jours <= 90) return 'DD_NORMAL'
-  return 'DD_3MOISETPLUS'
+  if (jours < 0)   return 'DD_NORMAL'
+  if (jours < 8)   return 'DD_PRIORITAIRE'  // 0–7j : +10% (< 2j → escalade HITL gérée séparément)
+  if (jours < 15)  return 'DD_URGENT'        // 8–14j : +5%
+  if (jours <= 90) return 'DD_NORMAL'        // 15–90j : -5%
+  return 'DD_3MOISETPLUS'                    // > 90j : -10%
 }
 
 // ─── Formule finale ───────────────────────────────────────────────────────────

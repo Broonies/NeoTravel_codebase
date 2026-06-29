@@ -282,6 +282,7 @@ const peagesTotal = aller_retour
           try {
             pdfUrl = await persisterDevis({
               demandeId:    demande.id,
+              urgence_code: urgenceCode,
               calcul:       d,
               trajet:       { ville_depart, ville_arrivee, km: route.data.km },
               dates:        { depart: safeDepart, arrivee: date_arrivee, nb_nuits },
