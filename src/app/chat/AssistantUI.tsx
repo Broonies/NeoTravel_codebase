@@ -22,6 +22,7 @@ type DevisOutput = {
   coefficients?: { saisonnalite: number; capacite: number; delai: number }
   supplements?: { peages: number; nuit_chauffeur: number; guide: number }
   mode?: string
+  pdf_url?: string | null
 }
 
 function pct(v: number) { return `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)} %` }
@@ -161,12 +162,13 @@ const CAPTURE_FIELDS = [
 // ── ChatUI ────────────────────────────────────────────────────────────────────
 
 export default function ChatUI() {
-  const [inputValue, setInputValue]   = useState('')
-  const [lastDevis, setLastDevis]     = useState<DevisOutput | null>(null)
-  const [pdfLoading, setPdfLoading]   = useState(false)
-  const [pdfUrl, setPdfUrl]           = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [panelOpen, setPanelOpen]     = useState(false)
+  const [inputValue, setInputValue]     = useState('')
+  const [lastDevis, setLastDevis]       = useState<DevisOutput | null>(null)
+  const [devisStatut, setDevisStatut]   = useState<'accepte' | 'refuse' | null>(null)
+  const [pdfLoading, setPdfLoading]     = useState(false)
+  const [pdfUrl, setPdfUrl]             = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen]   = useState(false)
+  const [panelOpen, setPanelOpen]       = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { messages, sendMessage, status } = useChat({
@@ -261,10 +263,12 @@ export default function ChatUI() {
               </div>
             ))}
           </div>
-          {lastDevis && (
+          {lastDevis && (() => {
+            const availableUrl = pdfUrl || lastDevis.pdf_url
+            return (
             <div className="mt-6 space-y-2">
               {/* Générer si pas encore de PDF */}
-              {!pdfUrl && (
+              {!availableUrl && (
                 <button
                   onClick={generatePdf}
                   disabled={pdfLoading}
@@ -275,21 +279,21 @@ export default function ChatUI() {
                 </button>
               )}
 
-              {/* Une fois l'URL disponible : deux boutons inversés */}
-              {pdfUrl && (
+              {/* Une fois l'URL disponible : deux boutons */}
+              {availableUrl && (
                 <>
                   <a
-                    href={pdfUrl}
+                    href={availableUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full font-semibold py-3 flex items-center justify-center gap-2 transition-all hover:-translate-y-px text-sm"
                     style={{ background: '#fff', color: '#5a2bd9', border: '1.5px solid #5a2bd9', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3-9v9m0 0l3-3m-3 3l-3-3" /></svg>
-                    Consulter en ligne
+                    Voir en ligne
                   </a>
                   <a
-                    href={pdfUrl}
+                    href={availableUrl}
                     download
                     className="w-full font-semibold py-3 flex items-center justify-center gap-2 transition-all hover:-translate-y-px text-sm"
                     style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif', boxShadow: '0 10px 22px -10px #5a2bd9' }}
@@ -308,7 +312,8 @@ export default function ChatUI() {
                 </>
               )}
             </div>
-          )}
+            )
+          })()}
         </div>
       </>
     )
@@ -416,13 +421,23 @@ export default function ChatUI() {
             )}
             {/* Bouton résumé mobile */}
             {lastDevis?.prix?.montant_ttc && (
-              <button
-                className="lg:hidden flex items-center gap-1.5 text-xs font-bold px-3 py-1.5"
-                style={{ background: '#c8db1a', color: '#1e1e32', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
-                onClick={() => setPanelOpen(true)}
-              >
-                {lastDevis.prix.montant_ttc} €
-              </button>
+              <div className="lg:hidden flex items-center gap-2">
+                <button
+                  className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5"
+                  style={{ background: '#c8db1a', color: '#1e1e32', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
+                  onClick={() => setPanelOpen(true)}
+                >
+                  {lastDevis.prix.montant_ttc} €
+                </button>
+                <button
+                  onClick={downloadPdf}
+                  disabled={pdfLoading}
+                  className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 disabled:opacity-40"
+                  style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
+                >
+                  {pdfLoading ? '⏳' : '⬇ PDF'}
+                </button>
+              </div>
             )}
           </div>
         </header>
