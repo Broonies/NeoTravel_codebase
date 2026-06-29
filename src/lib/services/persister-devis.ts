@@ -11,6 +11,7 @@ export interface PersisterDevisParams {
   passagers:    number
   aller_retour: boolean
   supplements:  { peages: number; nuit_chauffeur: number; guide: number }
+  client?:      { type_client: string; societe?: string; prenom?: string; nom?: string }
 }
 
 export async function persisterDevis(p: PersisterDevisParams): Promise<string | null> {
@@ -55,6 +56,7 @@ export async function persisterDevis(p: PersisterDevisParams): Promise<string | 
     },
     supplements:  p.supplements,
     mode:         p.calcul.mode_generation,
+    client:       p.client,
   }
 
   const pdfUrl = await generateAndStorePdf(devis.id, pdfData)

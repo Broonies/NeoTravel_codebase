@@ -183,6 +183,8 @@ const EXAMPLES = [
 
 export default function ChatUI() {
   const [inputValue, setInputValue] = useState('')
+  const [lastDevis, setLastDevis] = useState<DevisOutput | null>(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { messages, sendMessage, status } = useChat({
@@ -193,6 +195,18 @@ export default function ChatUI() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Extrait le dernier devis réussi pour le panel droit
+  useEffect(() => {
+    for (const msg of [...messages].reverse()) {
+      for (const part of [...msg.parts].reverse()) {
+        if (part.type === 'tool-calculer_devis' && part.state === 'output-available') {
+          const output = part.output as DevisOutput
+          if (output.ok) { setLastDevis(output); return }
+        }
+      }
+    }
   }, [messages])
 
   function handleSubmit(e: React.FormEvent) {

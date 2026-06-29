@@ -99,6 +99,7 @@ export function calculeSupplements(
 
 export function calculeUrgenceCode(date_demande: Date, date_depart: Date): UrgenceCode {
   const jours = differenceInCalendarDays(date_depart, date_demande)
+  if (jours < 0) return 'DD_NORMAL'
   if (jours < 2) return 'DD_PRIORITAIRE'
   if (jours <= 7) return 'DD_URGENT'
   if (jours <= 90) return 'DD_NORMAL'
