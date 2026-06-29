@@ -430,7 +430,7 @@ export default function ChatUI() {
                   {lastDevis.prix.montant_ttc} €
                 </button>
                 <button
-                  onClick={downloadPdf}
+                  onClick={generatePdf}
                   disabled={pdfLoading}
                   className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 disabled:opacity-40"
                   style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
