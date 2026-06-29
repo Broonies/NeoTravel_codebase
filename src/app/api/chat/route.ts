@@ -165,7 +165,7 @@ export async function POST(req: Request) {
     model: gateway('anthropic/claude-3-5-sonnet'),
     system: SYSTEM,
     messages: await convertToModelMessages(messages),
-    stopWhen: stepCountIs(1),
+    stopWhen: stepCountIs(2),
     onFinish: ({ usage, steps }) => {
       const total = (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
       const estimatedCost = ((usage.inputTokens ?? 0) * 0.00025 + (usage.outputTokens ?? 0) * 0.00125) / 1000
