@@ -48,7 +48,7 @@ export function TabNav({ currentTab, notifCount }: Props) {
   return (
     <>
       {/* ── Onglets ── */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 overflow-x-auto pb-px" style={{ scrollbarWidth: 'none' }}>
         {tabs.map(({ key, label, count }) => {
           const active   = currentTab === key;
           const hasAlert = count > 0;

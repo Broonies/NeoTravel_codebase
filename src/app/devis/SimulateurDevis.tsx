@@ -110,7 +110,7 @@ export default function DevisForm() {
 
             <div>
               <p className="mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: '#6e6e82', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Trajet</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Ville de départ">
                   <input name="ville_depart" type="text" required placeholder="Paris" style={inputSt} />
                 </Field>
@@ -136,7 +136,7 @@ export default function DevisForm() {
 
             <div>
               <p className="mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: '#6e6e82', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Dates</p>
-              <div className={`grid gap-3 ${allerRetour ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              <div className={`grid gap-3 ${allerRetour ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
                 <Field label="Date de départ">
                   <input name="date_depart" type="date" required style={inputSt} />
                 </Field>
@@ -187,7 +187,7 @@ export default function DevisForm() {
                 <div className="p-5 space-y-5">
 
                   {/* Stats trajet */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { label: 'Distance', val: `${result.km} km` },
                       { label: 'Péages (classe 4)', val: `${result.peages} €` },
