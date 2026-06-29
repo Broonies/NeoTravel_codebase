@@ -1,4 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
+
+:root {
+  --lime: #c8ff00;
+  --bg:   #080808;
+}
+
+body {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: var(--bg);
+  color: white;
+}
+
+.font-display {
+  font-family: 'Space Mono', 'Courier New', monospace;
+}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -10,10 +26,5 @@
   to   { opacity: 1; transform: translateY(0px)  scale(1); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-pop-in {
-  animation: pop-in 0.5s ease-out both;
-}
+.animate-float  { animation: float   4s ease-in-out infinite; }
+.animate-pop-in { animation: pop-in  0.5s ease-out both; }
