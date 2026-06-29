@@ -19,6 +19,9 @@ type DevisOutput = {
   coefficients?: { saisonnalite: number; capacite: number; delai: number }
   supplements?: { peages: number; nuit_chauffeur: number; guide: number }
   mode?: string
+  pdf_url?: string
+  lead_id?: number
+  demande_id?: number
 }
 
 function pct(v: number) {
@@ -33,6 +36,32 @@ function CoeffSpan({ v }: { v: number }) {
 // ── DevisCard ─────────────────────────────────────────────────────────────────
 
 function DevisCard({ output }: { output: DevisOutput }) {
+  const [pdfLoading, setPdfLoading] = useState(false)
+
+  async function downloadPdf() {
+    if (output.pdf_url) {
+      window.open(output.pdf_url, '_blank')
+      return
+    }
+    setPdfLoading(true)
+    try {
+      const res = await fetch('/api/devis/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(output),
+      })
+      const blob = await res.blob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `devis-neotravel-${output.trajet?.ville_depart ?? 'devis'}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setPdfLoading(false)
+    }
+  }
+
   if (!output.ok) {
     return (
       <div className="mt-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-sm text-rose-700">
@@ -124,6 +153,26 @@ function DevisCard({ output }: { output: DevisOutput }) {
           </div>
           {output.mode && (
             <p className="text-right text-slate-300 text-xs pt-0.5">{output.mode}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <button
+            onClick={downloadPdf}
+            disabled={pdfLoading}
+            className="w-full bg-slate-900 text-white rounded-xl py-2.5 text-xs font-medium hover:bg-slate-700 disabled:opacity-40 transition-colors"
+          >
+            {pdfLoading ? '⏳ Génération…' : '⬇ Télécharger le devis PDF'}
+          </button>
+          {output.pdf_url && (
+            <a
+              href={output.pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center bg-white border border-slate-200 text-slate-700 rounded-xl py-2.5 text-xs font-medium hover:bg-slate-50 transition-colors"
+            >
+              ↗ Voir le devis en ligne
+            </a>
           )}
         </div>
       </div>
