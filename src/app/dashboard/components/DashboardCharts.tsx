@@ -46,11 +46,11 @@ export function DashboardCharts({ funnelData, radarData, statutsData, typeClient
     <div className="space-y-5">
 
       {/* ── Ligne 1 : Pipeline (2/3) + Type de client (1/3) ── */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
 
         {/* Pipeline funnel */}
         <div
-          className="col-span-2 bg-white p-6"
+          className="lg:col-span-2 bg-white p-6"
           style={{ border: "1px solid #e6e6ee", borderRadius: "22px", boxShadow: "0 18px 40px -18px rgba(30,30,50,.12)" }}
         >
           <p className="text-xs font-semibold uppercase" style={{ color: "#6e6e82", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em" }}>
@@ -104,7 +104,7 @@ export function DashboardCharts({ funnelData, radarData, statutsData, typeClient
       </div>
 
       {/* ── Ligne 2 : Statuts (1/2) + Coefficients radar (1/2) ── */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
         {/* Statuts */}
         <div

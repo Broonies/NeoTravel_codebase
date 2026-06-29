@@ -85,7 +85,7 @@ export default function LandingPage() {
         />
 
         {/* Nav */}
-        <nav className="relative z-10 px-8 py-5 flex items-center justify-between">
+        <nav className="relative z-10 px-4 sm:px-8 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm"
@@ -211,7 +211,7 @@ export default function LandingPage() {
 
       {/* ── Section features (fond clair) ── */}
       <section style={{ background: '#f8f8fc', borderTop: '1px solid #e6e6ee' }}>
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
 
           <div className="text-center mb-12">
             <p
@@ -228,7 +228,7 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
             {FEATURES.map(({ icon, title, desc }) => (
               <div
                 key={title}

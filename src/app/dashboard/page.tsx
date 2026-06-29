@@ -210,7 +210,7 @@ export default async function DashboardPage({
 
       {/* ── Header ── */}
       <header className="bg-white" style={{ borderBottom: "1px solid #e6e6ee" }}>
-        <div className="px-8 py-4 flex items-center justify-between">
+        <div className="px-4 sm:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <Link
               href="/"
@@ -251,17 +251,17 @@ export default async function DashboardPage({
         </div>
 
         {/* Onglets */}
-        <div className="px-8 pb-0">
+        <div className="px-4 sm:px-8 pb-0">
           <TabNav currentTab={tab} notifCount={notifCount} />
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-8">
 
         {/* ══════════════ TAB : VUE D'ENSEMBLE ══════════════ */}
         {tab === "overview" && (
           <>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               <KpiCard
                 label="CA signé"
                 value={eur(kpis.totalCaAccept)}
