@@ -1,22 +1,22 @@
+// src/app/dashboard/page.tsx
 import Link from "next/link";
 import { getDossiersUrgents, type DossierUrgent } from "./actions";
+import { getDashboardKPIs } from "./lib/queries";
 import { DashboardCharts } from "./components/DashboardCharts";
 import { RelanceAlerts } from "./components/RelanceAlerts";
 
 const URGENCE_CONFIG = {
   DD_PRIORITAIRE: {
     label: "🔴 PRIORITAIRE",
-    bg: "bg-red-50",
-    border: "border-red-300",
+    bg: "bg-red-50/60",
+    border: "border-red-200",
     badge: "bg-red-100 text-red-700",
-    desc: "< 48h",
   },
   DD_URGENT: {
     label: "🟠 URGENT",
-    bg: "bg-orange-50",
+    bg: "bg-orange-50/60",
     border: "border-orange-200",
     badge: "bg-orange-100 text-orange-700",
-    desc: "2–7 jours",
   },
 };
 
@@ -28,183 +28,173 @@ function formatDate(iso: string) {
   });
 }
 
-function buildFunnelData(dossiers: DossierUrgent[]) {
-  const prioritaire = dossiers.filter(
-    (d) => d.urgence_code === "DD_PRIORITAIRE",
-  ).length;
-  const urgent = dossiers.filter((d) => d.urgence_code === "DD_URGENT").length;
-
-  return [
-    { name: "Prioritaires", value: prioritaire, fill: "#EF4444" },
-    { name: "Urgents", value: urgent, fill: "#F59E0B" },
-    { name: "Total", value: dossiers.length, fill: "#14B8A6" },
-  ];
-}
-
-function buildRadarData(dossiers: DossierUrgent[]) {
-  const totalPassagers = dossiers.reduce(
-    (sum, dossier) => sum + dossier.nb_passagers,
-    0,
-  );
-  const averagePassengers = dossiers.length
-    ? Math.round(totalPassagers / dossiers.length)
-    : 0;
-
-  return [
-    {
-      name: "Prioritaires",
-      value: dossiers.filter((d) => d.urgence_code === "DD_PRIORITAIRE").length,
-    },
-    {
-      name: "Urgents",
-      value: dossiers.filter((d) => d.urgence_code === "DD_URGENT").length,
-    },
-    { name: "Passagers", value: averagePassengers },
-  ];
-}
-
-function buildAlerts(dossiers: DossierUrgent[]) {
-  return dossiers.map((dossier) => ({
-    id: dossier.demande_id,
-    montant_ttc: dossier.nb_passagers * 150,
-    prochaine_relance: dossier.created_at,
-    demandes: {
-      ville_depart: dossier.ville_depart,
-      ville_arrivee: dossier.ville_arrivee,
-      leads: {
-        prenom: dossier.lead.prenom,
-        nom: dossier.lead.nom,
-        societe: dossier.lead.email,
-      },
-    },
-  }));
-}
-
 export default async function DashboardPage() {
-  const dossiers = await getDossiersUrgents();
+  // Récupération conjointe des données opérationnelles et des KPIs globaux
+  const [dossiers, kpis] = await Promise.all([
+    getDossiersUrgents(),
+    getDashboardKPIs(),
+  ]);
 
   const prioritaires = dossiers.filter(
     (d) => d.urgence_code === "DD_PRIORITAIRE",
   );
   const urgents = dossiers.filter((d) => d.urgence_code === "DD_URGENT");
-  const funnelData = buildFunnelData(dossiers);
-  const radarData = buildRadarData(dossiers);
-  const alerts = buildAlerts(dossiers);
+
+  // Formatage des alertes pour le composant RelanceAlerts
+  const alertsData = dossiers.map((d) => ({
+    id: d.demande_id,
+    montant_ttc: d.nb_passagers * 180, // Valeur estimée pour affichage dynamique
+    prochaine_relance: d.created_at,
+    demandes: {
+      ville_depart: d.ville_depart,
+      ville_arrivee: d.ville_arrivee,
+      leads: { prenom: d.lead.prenom, nom: d.lead.nom, societe: d.lead.email },
+    },
+  }));
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white px-6 py-4 flex items-center gap-3">
-        <Link
-          href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-xs font-bold text-white transition-colors hover:bg-gray-800"
-        >
-          N
-        </Link>
-        <div>
-          <p className="text-sm font-semibold text-gray-900">Dashboard Sales</p>
-          <p className="text-xs text-gray-400">Dossiers urgents · NeoTravel</p>
+    <div className="min-h-screen bg-[#FAFAFA]">
+      {/* Top Navigation Navigation */}
+      <header className="border-b border-gray-200 bg-white px-8 py-5 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white transition-transform hover:scale-105"
+          >
+            N
+          </Link>
+          <div>
+            <h1 className="text-base font-bold text-gray-900">
+              Pilotage Commercial & Multiplicateurs
+            </h1>
+            <p className="text-xs text-gray-400">
+              Analyse de performance et supervision de l'IA NeoTravel
+            </p>
+          </div>
         </div>
-        <span className="ml-auto text-xs text-gray-400">
-          {dossiers.length} dossier{dossiers.length > 1 ? "s" : ""} urgent
-          {dossiers.length > 1 ? "s" : ""}
-        </span>
+        <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-700">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Moteur Déterministe Actif
+        </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-8">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Dossiers urgents</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
-              {dossiers.length}
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-8">
+        {/* Résumé des KPIs Haut Niveau (High-Signal summary) */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-l-slate-400">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Volume d'Acquisition
+            </p>
+            <p className="mt-2 text-3xl font-bold text-gray-800 tracking-tight">
+              {kpis.totalLeads} leads
             </p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Prioritaires</p>
-            <p className="mt-2 text-2xl font-semibold text-red-600">
-              {prioritaires.length}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-l-[#E8872A]">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Taux de Conversion
+            </p>
+            <p className="mt-2 text-3xl font-bold text-[#E8872A] tracking-tight">
+              {kpis.conversionRate}%
             </p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Urgents</p>
-            <p className="mt-2 text-2xl font-semibold text-orange-600">
-              {urgents.length}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-l-[#00B4A0]">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Chiffre d'Affaires Signé
+            </p>
+            <p className="mt-2 text-3xl font-bold text-[#00B4A0] tracking-tight">
+              {new Intl.NumberFormat("fr-FR", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 0,
+              }).format(kpis.totalCaAccept)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-l-red-500">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Urgences Opérationnelles
+            </p>
+            <p className="mt-2 text-3xl font-bold text-red-600 tracking-tight">
+              {dossiers.length} fiches
             </p>
           </div>
         </div>
 
-        <DashboardCharts funnelData={funnelData} radarData={radarData} />
-        <RelanceAlerts alerts={alerts} />
+        {/* Section Analytique : Pipeline & Radar de Tarification */}
+        <DashboardCharts
+          funnelData={kpis.funnelData}
+          radarData={kpis.radarData}
+        />
 
-        {dossiers.length === 0 && (
-          <div className="rounded-xl border border-gray-200 bg-white py-20 text-center text-gray-400 shadow-sm">
-            <p className="mb-3 text-3xl">✅</p>
-            <p className="font-medium text-gray-600">Aucun dossier urgent</p>
-            <p className="mt-1 text-sm">
-              Toutes les demandes sont dans les délais normaux.
-            </p>
-          </div>
-        )}
+        {/* Alertes d'action immédiate */}
+        <RelanceAlerts alerts={alertsData} />
 
-        {prioritaires.length > 0 && (
-          <section>
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-red-600">
-              Prioritaire — départ &lt; 48h
+        {/* Listes de traitement opérationnel par niveau d'urgence */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bloc Prioritaire */}
+          <section className="space-y-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-red-600 flex items-center gap-2">
+              <span>🔴</span> Prioritaire — Départ imminent (&lt; 48h)
             </h2>
-            <div className="space-y-3">
-              {prioritaires.map((d) => (
+            {prioritaires.length === 0 ? (
+              <div className="text-center py-8 text-sm text-gray-400 bg-white border border-dashed rounded-xl">
+                Aucune urgence absolue.
+              </div>
+            ) : (
+              prioritaires.map((d) => (
                 <DossierCard key={d.demande_id} dossier={d} />
-              ))}
-            </div>
+              ))
+            )}
           </section>
-        )}
 
-        {urgents.length > 0 && (
-          <section>
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-orange-600">
-              Urgent — départ dans 2–7 jours
+          {/* Bloc Urgent */}
+          <section className="space-y-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-orange-600 flex items-center gap-2">
+              <span>🟠</span> Urgent — Départ sous 2 à 7 jours
             </h2>
-            <div className="space-y-3">
-              {urgents.map((d) => (
-                <DossierCard key={d.demande_id} dossier={d} />
-              ))}
-            </div>
+            {urgents.length === 0 ? (
+              <div className="text-center py-8 text-sm text-gray-400 bg-white border border-dashed rounded-xl">
+                Flux sous contrôle.
+              </div>
+            ) : (
+              urgents.map((d) => <DossierCard key={d.demande_id} dossier={d} />)
+            )}
           </section>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
 function DossierCard({ dossier: d }: { dossier: DossierUrgent }) {
-  const cfg = URGENCE_CONFIG[d.urgence_code];
+  const cfg = URGENCE_CONFIG[d.urgence_code] || URGENCE_CONFIG.DD_URGENT;
   return (
     <Link
       href={`/dashboard/dossier/${d.demande_id}`}
-      className={`block ${cfg.bg} ${cfg.border} border rounded-xl p-4 transition-shadow hover:shadow-sm`}
+      className={`block bg-white ${cfg.border} border rounded-xl p-4 transition-all hover:shadow-md hover:-translate-y-0.5`}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.badge}`}
+              className={`rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide ${cfg.badge}`}
             >
               {cfg.label}
             </span>
-            <span className="text-xs text-gray-500">
-              Départ le {formatDate(d.date_depart)}
+            <span className="text-xs text-gray-400">
+              Départ : {formatDate(d.date_depart)}
             </span>
           </div>
-          <p className="font-semibold text-gray-900">
+          <p className="font-bold text-gray-800 text-sm">
             {d.ville_depart} → {d.ville_arrivee}
           </p>
-          <p className="text-sm text-gray-600">
-            {d.lead.prenom} {d.lead.nom} · {d.nb_passagers} passagers
-          </p>
-          <p className="text-xs text-gray-400">
-            {d.lead.email} · {d.lead.telephone}
+          <p className="text-xs text-gray-500 font-medium">
+            {d.lead.prenom} {d.lead.nom} ·{" "}
+            <span className="text-slate-700 font-semibold">
+              {d.nb_passagers} passagers
+            </span>
           </p>
         </div>
-        <span className="mt-1 text-lg text-gray-400">→</span>
+        <span className="text-gray-300 font-bold self-center text-lg">→</span>
       </div>
     </Link>
   );
