@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import ChatUI from './chat/ChatUI'
 
 export default function Home() {
