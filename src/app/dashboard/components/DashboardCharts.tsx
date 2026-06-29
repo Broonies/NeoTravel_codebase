@@ -63,7 +63,7 @@ export function DashboardCharts({
         </h3>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" r="75%" data={radarData}>
+            <RadarChart cx="50%" cy="50%" data={radarData}>
               <PolarGrid stroke="#E2E8F0" />
               <PolarAngleAxis
                 dataKey="name"
