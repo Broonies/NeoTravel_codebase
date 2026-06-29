@@ -240,13 +240,6 @@ export default async function DashboardPage({
               </svg>
               Assistant IA
             </Link>
-            <div
-              className="flex items-center gap-2 text-xs font-semibold px-3 py-2"
-              style={{ background: "#f3eefc", color: "#5a2bd9", border: "1px solid #e7defb", borderRadius: "999px", fontFamily: "Inter, sans-serif" }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#5a2bd9" }} />
-              Moteur actif
-            </div>
           </div>
         </div>
 

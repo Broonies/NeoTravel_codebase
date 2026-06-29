@@ -132,6 +132,7 @@ export default function ChatUI() {
   const [inputValue, setInputValue]   = useState('')
   const [lastDevis, setLastDevis]     = useState<DevisOutput | null>(null)
   const [pdfLoading, setPdfLoading]   = useState(false)
+  const [pdfUrl, setPdfUrl]           = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [panelOpen, setPanelOpen]     = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -166,16 +167,14 @@ export default function ChatUI() {
     setSidebarOpen(false)
   }
 
-  async function downloadPdf() {
+  async function generatePdf() {
     if (!lastDevis) return
     setPdfLoading(true)
+    setPdfUrl(null)
     try {
       const res  = await fetch('/api/devis/pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lastDevis) })
-      const blob = await res.blob()
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href = url; a.download = `devis-neotravel-${lastDevis.trajet?.ville_depart ?? 'devis'}.pdf`; a.click()
-      URL.revokeObjectURL(url)
+      const json = await res.json()
+      if (json.url) setPdfUrl(json.url)
     } finally { setPdfLoading(false) }
   }
 
@@ -231,14 +230,52 @@ export default function ChatUI() {
             ))}
           </div>
           {lastDevis && (
-            <button
-              onClick={downloadPdf}
-              disabled={pdfLoading}
-              className="mt-6 w-full font-semibold py-3 transition-all disabled:opacity-40 hover:-translate-y-px"
-              style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', boxShadow: '0 10px 22px -10px #5a2bd9' }}
-            >
-              {pdfLoading ? '⏳ Génération…' : '⬇ Générer le devis PDF'}
-            </button>
+            <div className="mt-6 space-y-2">
+              {/* Générer si pas encore de PDF */}
+              {!pdfUrl && (
+                <button
+                  onClick={generatePdf}
+                  disabled={pdfLoading}
+                  className="w-full font-semibold py-3 transition-all disabled:opacity-40 hover:-translate-y-px"
+                  style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', boxShadow: '0 10px 22px -10px #5a2bd9' }}
+                >
+                  {pdfLoading ? '⏳ Génération…' : '⬇ Générer le devis PDF'}
+                </button>
+              )}
+
+              {/* Une fois l'URL disponible : deux boutons inversés */}
+              {pdfUrl && (
+                <>
+                  <a
+                    href={pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full font-semibold py-3 flex items-center justify-center gap-2 transition-all hover:-translate-y-px text-sm"
+                    style={{ background: '#fff', color: '#5a2bd9', border: '1.5px solid #5a2bd9', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3-9v9m0 0l3-3m-3 3l-3-3" /></svg>
+                    Consulter en ligne
+                  </a>
+                  <a
+                    href={pdfUrl}
+                    download
+                    className="w-full font-semibold py-3 flex items-center justify-center gap-2 transition-all hover:-translate-y-px text-sm"
+                    style={{ background: '#5a2bd9', color: '#fff', borderRadius: '999px', fontFamily: 'Poppins, sans-serif', boxShadow: '0 10px 22px -10px #5a2bd9' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Télécharger
+                  </a>
+                  <button
+                    onClick={generatePdf}
+                    disabled={pdfLoading}
+                    className="w-full text-xs py-1.5 transition-colors hover:underline disabled:opacity-40"
+                    style={{ color: '#a8a8ba', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {pdfLoading ? '⏳ Regénération…' : '↻ Regénérer'}
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
       </>
@@ -313,7 +350,11 @@ export default function ChatUI() {
         </div>
 
         <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <button onClick={() => { window.location.reload(); setSidebarOpen(false) }} className="w-full text-sm font-semibold py-2.5" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}>
+          <button
+            onClick={() => { window.location.reload(); setSidebarOpen(false) }}
+            className="w-full text-sm font-semibold py-2.5 transition-all hover:bg-white/20 hover:text-white hover:border-white/30 hover:-translate-y-px active:translate-y-0"
+            style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '999px', fontFamily: 'Poppins, sans-serif' }}
+          >
             + Nouvelle conversation
           </button>
         </div>
@@ -351,10 +392,6 @@ export default function ChatUI() {
                 {lastDevis.prix.montant_ttc} €
               </button>
             )}
-            <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5" style={{ background: '#f3eefc', color: '#5a2bd9', border: '1px solid #e7defb', borderRadius: '999px', fontFamily: 'Inter, sans-serif' }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#5a2bd9' }} />
-              AI Active
-            </span>
           </div>
         </header>
 
