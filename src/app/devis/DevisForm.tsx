@@ -66,7 +66,7 @@ export default function DevisForm() {
           <p className="text-xs text-slate-400">Formulaire de devis</p>
         </div>
         <Link
-          href="/"
+          href="/chat"
           className="ml-auto flex items-center gap-1.5 text-slate-400 hover:text-white text-xs transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
