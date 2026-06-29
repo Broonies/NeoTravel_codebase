@@ -64,9 +64,7 @@ function DevisCard({ output, onAccept, onRefuse, statut }: {
           {[
             { label: 'Distance', value: `${output.trajet?.km} km` },
             { label: 'Passagers', value: `${output.passagers}` },
-            (output.dates?.nb_nuits ?? 0) > 0
-              ? { label: 'Durée', value: `${output.dates?.nb_nuits} nuit${(output.dates?.nb_nuits ?? 0) > 1 ? 's' : ''}` }
-              : { label: 'Type', value: output.aller_retour ? 'A/R' : 'Aller simple' },
+            { label: 'Type', value: output.aller_retour ? 'A/R' : 'Aller simple' },
           ].map(({ label, value }) => (
             <div key={label} className="p-2.5 text-center" style={{ background: '#f8f8fc', borderRadius: '8px' }}>
               <div className="text-xs" style={{ color: '#6e6e82' }}>{label}</div>
