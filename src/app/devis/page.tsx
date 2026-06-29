@@ -1,5 +1,5 @@
-import DevisForm from './DevisForm'
+import SimulateurDevis from './SimulateurDevis'
 
 export default function DevisPage() {
-  return <DevisForm />
+  return <SimulateurDevis />
 }
