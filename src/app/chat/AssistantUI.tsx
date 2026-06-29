@@ -161,12 +161,13 @@ const CAPTURE_FIELDS = [
 // ── ChatUI ────────────────────────────────────────────────────────────────────
 
 export default function ChatUI() {
-  const [inputValue, setInputValue]   = useState('')
-  const [lastDevis, setLastDevis]     = useState<DevisOutput | null>(null)
-  const [pdfLoading, setPdfLoading]   = useState(false)
-  const [pdfUrl, setPdfUrl]           = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [panelOpen, setPanelOpen]     = useState(false)
+  const [inputValue, setInputValue]     = useState('')
+  const [lastDevis, setLastDevis]       = useState<DevisOutput | null>(null)
+  const [devisStatut, setDevisStatut]   = useState<'accepte' | 'refuse' | null>(null)
+  const [pdfLoading, setPdfLoading]     = useState(false)
+  const [pdfUrl, setPdfUrl]             = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen]   = useState(false)
+  const [panelOpen, setPanelOpen]       = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { messages, sendMessage, status } = useChat({
