@@ -55,6 +55,7 @@ function DevisCard({ output }: { output: DevisOutput }) {
     }
   }
 
+function DevisCard({ output }: { output: DevisOutput }) {
   if (!output.ok) {
     return (
       <div className="mt-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-sm text-rose-700">
@@ -385,6 +386,26 @@ export default function ChatUI() {
         </p>
       </div>
 
+        {/* Metadata */}
+        {lastDevis && (
+          <div className="px-5 py-4 space-y-2.5 text-xs">
+            <div className="flex justify-between text-slate-400">
+              <span>Agent</span>
+              <span className="text-slate-600 font-medium">NeoTravel AI v2.1</span>
+            </div>
+            <div className="flex justify-between text-slate-400">
+              <span>Matrix</span>
+              <span className="text-emerald-600 font-medium">✓ Loaded</span>
+            </div>
+            {lastDevis.mode && (
+              <div className="flex justify-between text-slate-400">
+                <span>Mode</span>
+                <span className="text-emerald-600 font-medium">✓ {lastDevis.mode}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </aside>
     </div>
   )
 }
