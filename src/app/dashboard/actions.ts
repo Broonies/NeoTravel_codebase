@@ -102,6 +102,11 @@ export async function getRelancesActives(): Promise<RelanceActive[]> {
   })
 }
 
+export async function updateDevisStatut(devisId: number, statut: 'accepte' | 'refuse') {
+  const supabase = getSupabaseClient()
+  await supabase.from('devis').update({ statut }).eq('id', devisId)
+}
+
 export async function getDossierComplet(demandeId: number): Promise<DossierComplet | null> {
   const supabase = getSupabaseClient()
   const { data: dem, error } = await supabase

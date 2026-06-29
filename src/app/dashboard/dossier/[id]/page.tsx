@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { getDossierComplet } from '../../actions'
+import { notFound, redirect } from 'next/navigation'
+import { getDossierComplet, updateDevisStatut } from '../../actions'
 
 const URGENCE_LABELS: Record<string, string> = {
   DD_PRIORITAIRE: '🔴 Prioritaire (< 48h)',
@@ -16,6 +16,14 @@ const STATUT_LABELS: Record<string, string> = {
   accepte:   '✅ Accepté',
   refuse:    '❌ Refusé',
   cloture:   '🔒 Clôturé',
+}
+
+const DEMANDE_STATUT_LABELS: Record<string, string> = {
+  demande_qualifiee:   'Qualifiée',
+  demande_incomplete:  'Incomplète',
+  cas_complexe:        'Cas complexe',
+  en_attente:          'En attente',
+  escalade:            'Escalade humaine',
 }
 
 function formatDate(iso?: string) {
@@ -61,7 +69,7 @@ export default async function DossierPage({ params }: { params: Promise<{ id: st
         {/* Lead */}
         <section className="bg-white rounded-xl border p-5">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Contact</h2>
-          <Row label="Nom" value={`${lead.prenom} ${lead.nom}`} />
+          <Row label="Nom" value={[lead.prenom, lead.nom].filter(Boolean).join(' ') || 'Non renseigné'} />
           <Row label="Email" value={lead.email} />
           <Row label="Téléphone" value={lead.telephone} />
           <Row label="Type" value={lead.type_client} />
@@ -76,7 +84,7 @@ export default async function DossierPage({ params }: { params: Promise<{ id: st
           <Row label="Date de départ" value={formatDate(demande.date_depart)} />
           <Row label="Date de retour" value={demande.aller_retour ? formatDate(demande.date_arrivee) : 'Aller simple'} />
           <Row label="Passagers" value={demande.nb_passagers} />
-          <Row label="Statut demande" value={demande.type_statut} />
+          <Row label="Statut demande" value={DEMANDE_STATUT_LABELS[demande.type_statut] ?? demande.type_statut} />
           <Row label="Complétude" value={`${Math.round(demande.score_completude * 100)} %`} />
           {demande.commentaire && <Row label="Commentaire" value={demande.commentaire} />}
         </section>
@@ -103,6 +111,36 @@ export default async function DossierPage({ params }: { params: Promise<{ id: st
                   >
                     ⬇ Télécharger le PDF
                   </a>
+                </div>
+              )}
+              {!['accepte', 'refuse', 'cloture'].includes(devis.statut) && (
+                <div className="mt-4 flex gap-3">
+                  <form action={async () => {
+                    'use server'
+                    await updateDevisStatut(devis!.id, 'accepte')
+                    redirect(`/dashboard/dossier/${demande.id}`)
+                  }}>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+                      style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #86efac' }}
+                    >
+                      ✅ Marquer Accepté
+                    </button>
+                  </form>
+                  <form action={async () => {
+                    'use server'
+                    await updateDevisStatut(devis!.id, 'refuse')
+                    redirect(`/dashboard/dossier/${demande.id}`)
+                  }}>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+                      style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }}
+                    >
+                      ❌ Marquer Refusé
+                    </button>
+                  </form>
                 </div>
               )}
             </>

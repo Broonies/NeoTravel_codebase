@@ -48,6 +48,11 @@ export default function DevisForm() {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     const dateDepart = fd.get('date_depart') as string
+    const dateArrivee = fd.get('date_arrivee') as string
+    if (allerRetour && dateArrivee && dateArrivee < dateDepart) {
+      setResult({ ok: false, error: 'La date de retour doit être après la date de départ.' } as DevisActionResult)
+      return
+    }
     setResult(null)
     startTransition(async () => {
       const res = await calculerDevisAction({

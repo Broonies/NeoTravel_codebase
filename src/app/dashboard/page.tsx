@@ -3,6 +3,7 @@ import { getDossiersUrgents, getRelancesActives, type DossierUrgent, type Relanc
 import { getDashboardKPIs } from "./lib/queries";
 import { DashboardCharts } from "./components/DashboardCharts";
 import { TabNav } from "./components/TabNav";
+import { AutoRefresh } from "./AutoRefresh";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -207,6 +208,7 @@ export default async function DashboardPage({
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fc" }}>
+      <AutoRefresh intervalMs={30_000} />
 
       {/* ── Header ── */}
       <header className="bg-white" style={{ borderBottom: "1px solid #e6e6ee" }}>
