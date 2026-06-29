@@ -42,7 +42,10 @@ Demande les informations manquantes explicitement, une ou deux à la fois.
   2. Ville d'arrivée
   3. Date de départ — format JJ/MM/AAAA, convertis en YYYY-MM-DD.
      Les dates sont TOUJOURS dans le futur. Si une date sans année est déjà passée cette année, prends l'année suivante silencieusement.
-  4. Aller simple ou aller/retour ? → Si aller simple : ne pas demander de date de retour. Si aller/retour : demander la date de retour.
+  4. Aller simple ou aller/retour ?
+     → Si aller simple : ne pas demander de date de retour.
+     → Si aller/retour : BLOQUANT — demande OBLIGATOIREMENT la date de retour avant de passer à la suite.
+       Ne jamais appeler calculer_devis() avec aller_retour=true sans date_arrivee.
   5. Nombre de passagers
   6. Guide touristique inclus ? (défaut : non)
 
@@ -173,7 +176,7 @@ export async function POST(req: Request) {
           ville_depart:  z.string().describe('Ville de départ'),
           ville_arrivee: z.string().describe("Ville d'arrivée"),
           date_depart:   z.string().describe('Date de départ (YYYY-MM-DD)'),
-          date_arrivee:  z.string().optional().describe('Date de retour (YYYY-MM-DD). Omettre si aller simple.'),
+          date_arrivee:  z.string().optional().describe('Date de retour (YYYY-MM-DD). OBLIGATOIRE si aller_retour=true. Omettre uniquement si aller_retour=false.'),
           nb_passagers:  z.number().int().min(1).describe('Nombre de passagers'),
           aller_retour:  z.boolean().describe('true = aller/retour, false = aller simple'),
           guide:         z.boolean().describe('true = guide touristique inclus'),
@@ -185,6 +188,11 @@ export async function POST(req: Request) {
           nb_passagers, aller_retour, guide,
           type_client, societe,
         }) => {
+          // Garde-fou : aller/retour sans date de retour → erreur bloquante
+          if (aller_retour && !_dateArrivee) {
+            return { ok: false, error: 'DATE_RETOUR_MANQUANTE', reason: 'La date de retour est obligatoire pour un aller/retour.' }
+          }
+
           // Filet de sécurité : date passée → avance d'un an silencieusement
           let safeDepart = date_depart
           const today = new Date(); today.setHours(0, 0, 0, 0)
