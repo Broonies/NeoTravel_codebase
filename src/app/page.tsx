@@ -20,24 +20,24 @@ const FEATURES = [
 
 const DESTINATIONS = [
   // Gauche colonne 1
-  { city: 'Marseille',        country: 'Provence',           img: 'https://loremflickr.com/280/180/marseille,port?lock=5',          style: { top: '2%',  left: '1%'  }, rotate: -4, delay: 0,    duration: 3.8, size: 'lg' },
-  { city: 'Lyon',             country: 'Auvergne-Rhône',     img: 'https://loremflickr.com/280/180/fourviere,lyon?lock=4',          style: { top: '26%', left: '-1%' }, rotate: 2,  delay: 0.5,  duration: 4.2, size: 'md' },
-  { city: 'Toulouse',         country: 'Occitanie',          img: 'https://loremflickr.com/280/180/toulouse,france?lock=6',         style: { top: '50%', left: '1%'  }, rotate: -2, delay: 1.0,  duration: 3.6, size: 'lg' },
-  { city: 'Nantes',           country: 'Pays de la Loire',   img: 'https://loremflickr.com/280/180/nantes,france?lock=8',          style: { top: '74%', left: '-1%' }, rotate: 3,  delay: 1.5,  duration: 4.0, size: 'md' },
+  { city: 'Marseille',        country: 'Provence',           img: 'https://picsum.photos/seed/marseille/280/180',     style: { top: '2%',  left: '1%'  }, rotate: -4, delay: 0,    duration: 3.8, size: 'lg' },
+  { city: 'Lyon',             country: 'Auvergne-Rhône',     img: 'https://picsum.photos/seed/lyon/280/180',          style: { top: '26%', left: '-1%' }, rotate: 2,  delay: 0.5,  duration: 4.2, size: 'md' },
+  { city: 'Toulouse',         country: 'Occitanie',          img: 'https://picsum.photos/seed/toulouse/280/180',      style: { top: '50%', left: '1%'  }, rotate: -2, delay: 1.0,  duration: 3.6, size: 'lg' },
+  { city: 'Nantes',           country: 'Pays de la Loire',   img: 'https://picsum.photos/seed/nantes/280/180',        style: { top: '74%', left: '-1%' }, rotate: 3,  delay: 1.5,  duration: 4.0, size: 'md' },
   // Gauche colonne 2
-  { city: 'Paris',            country: 'Île-de-France',      img: 'https://loremflickr.com/280/180/paris,eiffel?lock=9',           style: { top: '14%', left: '17%' }, rotate: -1, delay: 0.3,  duration: 4.5, size: 'sm' },
-  { city: 'Mont-Saint-Michel',country: 'Normandie',          img: 'https://loremflickr.com/280/180/mont-saint-michel?lock=11',     style: { top: '62%', left: '15%' }, rotate: 2,  delay: 1.2,  duration: 3.7, size: 'sm' },
-  { city: 'Grenoble',         country: 'Isère',              img: 'https://loremflickr.com/280/180/grenoble,alpes?lock=14',        style: { top: '88%', left: '2%'  }, rotate: -3, delay: 1.8,  duration: 4.3, size: 'sm' },
+  { city: 'Paris',            country: 'Île-de-France',      img: 'https://picsum.photos/seed/paris/280/180',         style: { top: '14%', left: '17%' }, rotate: -1, delay: 0.3,  duration: 4.5, size: 'sm' },
+  { city: 'Mont-Saint-Michel',country: 'Normandie',          img: 'https://picsum.photos/seed/normandie/280/180',     style: { top: '62%', left: '15%' }, rotate: 2,  delay: 1.2,  duration: 3.7, size: 'sm' },
+  { city: 'Grenoble',         country: 'Isère',              img: 'https://picsum.photos/seed/grenoble/280/180',      style: { top: '88%', left: '2%'  }, rotate: -3, delay: 1.8,  duration: 4.3, size: 'sm' },
   // Droite colonne 1
-  { city: 'Nice',             country: "Côte d'Azur",        img: 'https://loremflickr.com/280/180/nice,riviera?lock=7',           style: { top: '1%',  right: '1%' }, rotate: 3,  delay: 0.2,  duration: 4.4, size: 'lg' },
-  { city: 'Bordeaux',         country: 'Nouvelle-Aquitaine', img: 'https://loremflickr.com/280/180/bordeaux,france?lock=3',        style: { top: '25%', right: '-1%'}, rotate: -3, delay: 0.7,  duration: 3.9, size: 'md' },
-  { city: 'Strasbourg',       country: 'Grand Est',          img: 'https://loremflickr.com/280/180/strasbourg,alsace?lock=2',      style: { top: '50%', right: '1%' }, rotate: 2,  delay: 1.1,  duration: 4.1, size: 'lg' },
-  { city: 'Rennes',           country: 'Bretagne',           img: 'https://loremflickr.com/280/180/rennes,bretagne?lock=13',       style: { top: '75%', right: '-1%'}, rotate: -2, delay: 1.6,  duration: 3.5, size: 'md' },
+  { city: 'Nice',             country: "Côte d'Azur",        img: 'https://picsum.photos/seed/nice/280/180',          style: { top: '1%',  right: '1%' }, rotate: 3,  delay: 0.2,  duration: 4.4, size: 'lg' },
+  { city: 'Bordeaux',         country: 'Nouvelle-Aquitaine', img: 'https://picsum.photos/seed/bordeaux/280/180',      style: { top: '25%', right: '-1%'}, rotate: -3, delay: 0.7,  duration: 3.9, size: 'md' },
+  { city: 'Strasbourg',       country: 'Grand Est',          img: 'https://picsum.photos/seed/strasbourg/280/180',    style: { top: '50%', right: '1%' }, rotate: 2,  delay: 1.1,  duration: 4.1, size: 'lg' },
+  { city: 'Rennes',           country: 'Bretagne',           img: 'https://picsum.photos/seed/rennes/280/180',        style: { top: '75%', right: '-1%'}, rotate: -2, delay: 1.6,  duration: 3.5, size: 'md' },
   // Droite colonne 2
-  { city: 'Barcelone',        country: 'Espagne',            img: 'https://loremflickr.com/280/180/barcelona,spain?lock=15',       style: { top: '13%', right: '17%'}, rotate: 4,  delay: 0.4,  duration: 4.6, size: 'sm' },
-  { city: 'Rome',             country: 'Italie',             img: 'https://loremflickr.com/280/180/rome,colosseum?lock=16',        style: { top: '40%', right: '14%'}, rotate: -2, delay: 0.9,  duration: 3.8, size: 'sm' },
-  { city: 'Amsterdam',        country: 'Pays-Bas',           img: 'https://loremflickr.com/280/180/amsterdam,canal?lock=17',       style: { top: '63%', right: '16%'}, rotate: 3,  delay: 1.3,  duration: 4.2, size: 'sm' },
-  { city: 'Versailles',       country: 'Île-de-France',      img: 'https://loremflickr.com/280/180/versailles,palace?lock=18',     style: { top: '87%', right: '3%' }, rotate: -1, delay: 1.9,  duration: 3.6, size: 'sm' },
+  { city: 'Barcelone',        country: 'Espagne',            img: 'https://picsum.photos/seed/barcelona/280/180',     style: { top: '13%', right: '17%'}, rotate: 4,  delay: 0.4,  duration: 4.6, size: 'sm' },
+  { city: 'Rome',             country: 'Italie',             img: 'https://picsum.photos/seed/rome/280/180',          style: { top: '40%', right: '14%'}, rotate: -2, delay: 0.9,  duration: 3.8, size: 'sm' },
+  { city: 'Amsterdam',        country: 'Pays-Bas',           img: 'https://picsum.photos/seed/amsterdam/280/180',     style: { top: '63%', right: '16%'}, rotate: 3,  delay: 1.3,  duration: 4.2, size: 'sm' },
+  { city: 'Versailles',       country: 'Île-de-France',      img: 'https://picsum.photos/seed/versailles/280/180',    style: { top: '87%', right: '3%' }, rotate: -1, delay: 1.9,  duration: 3.6, size: 'sm' },
 ]
 
 const CARD_SIZES: Record<string, string> = {

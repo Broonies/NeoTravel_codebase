@@ -143,19 +143,19 @@ function EscaladeCard({ output }: { output: { ok: boolean; message: string } }) 
 // ── Data ───────────────────────────────────────────────────────────────────────
 
 const EXAMPLES = [
-  { city: 'Paris → Lyon',              img: 'https://loremflickr.com/320/200/paris,eiffel?lock=9',         hint: '30 passagers · 15 sept' },
-  { city: 'Marseille → Nice',          img: 'https://loremflickr.com/320/200/marseille,port?lock=5',        hint: '50 pers. · aller/retour' },
-  { city: 'Paris → Bordeaux',          img: 'https://loremflickr.com/320/200/bordeaux,france?lock=3',       hint: '100 personnes' },
-  { city: 'Lyon → Barcelone',          img: 'https://loremflickr.com/320/200/barcelona,spain?lock=15',      hint: '45 pers. · weekend' },
-  { city: 'Nantes → Strasbourg',       img: 'https://loremflickr.com/320/200/strasbourg,alsace?lock=2',     hint: '35 pers. · aller simple' },
-  { city: 'Paris → Mont-Saint-Michel', img: 'https://loremflickr.com/320/200/mont-saint-michel?lock=11',   hint: '55 personnes' },
+  { city: 'Paris → Lyon',              img: 'https://picsum.photos/seed/paris/320/200',      hint: '30 passagers · 15 sept' },
+  { city: 'Marseille → Nice',          img: 'https://picsum.photos/seed/marseille/320/200',  hint: '50 pers. · aller/retour' },
+  { city: 'Paris → Bordeaux',          img: 'https://picsum.photos/seed/bordeaux/320/200',   hint: '100 personnes' },
+  { city: 'Lyon → Barcelone',          img: 'https://picsum.photos/seed/barcelona/320/200',  hint: '45 pers. · weekend' },
+  { city: 'Nantes → Strasbourg',       img: 'https://picsum.photos/seed/strasbourg/320/200', hint: '35 pers. · aller simple' },
+  { city: 'Paris → Mont-Saint-Michel', img: 'https://picsum.photos/seed/normandie/320/200',  hint: '55 personnes' },
 ]
 
 const RECENT_TRIPS = [
-  { label: 'Paris → Lyon',     date: '12 juin', img: 'https://loremflickr.com/80/55/paris,eiffel?lock=9'     },
-  { label: 'Marseille → Nice', date: '8 juin',  img: 'https://loremflickr.com/80/55/marseille,port?lock=5'   },
-  { label: 'Paris → Bordeaux', date: '3 juin',  img: 'https://loremflickr.com/80/55/bordeaux,france?lock=3'  },
-  { label: 'Lyon → Barcelone', date: '28 mai',  img: 'https://loremflickr.com/80/55/barcelona,spain?lock=15' },
+  { label: 'Paris → Lyon',     date: '12 juin', img: 'https://picsum.photos/seed/paris/80/55'      },
+  { label: 'Marseille → Nice', date: '8 juin',  img: 'https://picsum.photos/seed/marseille/80/55'  },
+  { label: 'Paris → Bordeaux', date: '3 juin',  img: 'https://picsum.photos/seed/bordeaux/80/55'   },
+  { label: 'Lyon → Barcelone', date: '28 mai',  img: 'https://picsum.photos/seed/barcelona/80/55'  },
 ]
 
 const CAPTURE_FIELDS = [
