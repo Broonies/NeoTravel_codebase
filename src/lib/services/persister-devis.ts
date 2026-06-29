@@ -5,6 +5,7 @@ import type { DevisData } from '@/lib/types'
 
 export interface PersisterDevisParams {
   demandeId:    number
+  urgence_code: string
   calcul:       DevisData
   trajet:       { ville_depart: string; ville_arrivee: string; km: number }
   dates:        { depart: string; arrivee: string; nb_nuits: number }
@@ -18,7 +19,8 @@ export async function persisterDevis(p: PersisterDevisParams): Promise<string | 
   const repos = getSupabaseRepos()
 
   const prochaine = new Date()
-  prochaine.setDate(prochaine.getDate() + 7)
+  const delaiRelance = p.urgence_code === 'DD_PRIORITAIRE' ? 2 : 7
+  prochaine.setDate(prochaine.getDate() + delaiRelance)
 
   const devis = await repos.devis.create({
     demande_id:         p.demandeId,

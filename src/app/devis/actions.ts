@@ -128,6 +128,7 @@ export async function calculerDevisAction(input: DevisFormInput): Promise<DevisA
   try {
     pdfUrl = await persisterDevis({
       demandeId:    demande.id,
+      urgence_code: urgenceCode,
       calcul:       d,
       trajet:       { ville_depart: input.ville_depart, ville_arrivee: input.ville_arrivee, km: route.data.km },
       dates:        { depart: input.date_depart, arrivee: input.date_arrivee, nb_nuits },
