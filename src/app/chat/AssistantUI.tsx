@@ -4,6 +4,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { updateDevisStatutByDemande } from './actions'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -11,6 +12,8 @@ type DevisOutput = {
   ok: boolean
   error?: string
   reason?: string
+  demande_id?: number
+  lead_id?: number
   trajet?: { ville_depart: string; ville_arrivee: string; km: number }
   passagers?: number
   aller_retour?: boolean
@@ -31,7 +34,12 @@ function CoeffSpan({ v }: { v: number }) {
 
 // ── DevisCard ─────────────────────────────────────────────────────────────────
 
-function DevisCard({ output }: { output: DevisOutput }) {
+function DevisCard({ output, onAccept, onRefuse, statut }: {
+  output: DevisOutput
+  onAccept?: () => void
+  onRefuse?: () => void
+  statut?: 'accepte' | 'refuse' | null
+}) {
   if (!output.ok) return (
     <div className="mt-3 p-4 text-sm" style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: '14px', color: '#b91c1c' }}>
       <span className="font-semibold">Erreur : </span>{output.error}{output.reason ? ` — ${output.reason}` : ''}
@@ -89,6 +97,30 @@ function DevisCard({ output }: { output: DevisOutput }) {
           </div>
           {output.mode && <p className="text-right" style={{ color: '#a8a8ba', fontSize: '10px' }}>{output.mode}</p>}
         </div>
+        {onAccept && onRefuse && (
+          statut ? (
+            <div className="px-4 pb-4 text-center text-sm font-semibold" style={{ color: statut === 'accepte' ? '#15803d' : '#dc2626', fontFamily: 'Poppins, sans-serif' }}>
+              {statut === 'accepte' ? '✅ Devis accepté' : '❌ Devis refusé'}
+            </div>
+          ) : (
+            <div className="px-4 pb-4 flex gap-2">
+              <button
+                onClick={onAccept}
+                className="flex-1 py-2 text-sm font-semibold rounded-xl transition-colors"
+                style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #86efac', fontFamily: 'Inter, sans-serif' }}
+              >
+                ✅ Accepter
+              </button>
+              <button
+                onClick={onRefuse}
+                className="flex-1 py-2 text-sm font-semibold rounded-xl transition-colors"
+                style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontFamily: 'Inter, sans-serif' }}
+              >
+                ❌ Refuser
+              </button>
+            </div>
+          )
+        )}
       </div>
     </div>
   )
@@ -440,7 +472,24 @@ export default function ChatUI() {
                         }>{part.text}</div>
                       )
                       if (part.type === 'tool-calculer_devis') {
-                        if (part.state === 'output-available') return <DevisCard key={i} output={part.output as DevisOutput} />
+                        if (part.state === 'output-available') {
+                          const output = part.output as DevisOutput
+                          return (
+                            <DevisCard
+                              key={i}
+                              output={output}
+                              statut={devisStatut}
+                              onAccept={output.ok && output.demande_id ? async () => {
+                                await updateDevisStatutByDemande(output.demande_id!, 'accepte')
+                                setDevisStatut('accepte')
+                              } : undefined}
+                              onRefuse={output.ok && output.demande_id ? async () => {
+                                await updateDevisStatutByDemande(output.demande_id!, 'refuse')
+                                setDevisStatut('refuse')
+                              } : undefined}
+                            />
+                          )
+                        }
                         return <div key={i} className="mt-2 text-xs italic flex items-center gap-1.5" style={{ color: '#6e6e82', fontFamily: 'Inter, sans-serif' }}><span className="animate-pulse">⏳</span> Calcul…</div>
                       }
                       if (part.type === 'tool-escalade_humain') {

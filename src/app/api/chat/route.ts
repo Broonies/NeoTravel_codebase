@@ -223,7 +223,7 @@ export async function POST(req: Request) {
           const route = await getRouteInfo(ville_depart, ville_arrivee)
           if (!route.ok) return { ok: false, error: route.error }
 
-          const peagesTotal = aller_retour
+const peagesTotal = aller_retour
             ? Math.round(route.data.peages * 2 * 100) / 100
             : route.data.peages
 
