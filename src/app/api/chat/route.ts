@@ -102,7 +102,8 @@ RÈGLE ABSOLUE : STOP après chaque question. N'enchaîne JAMAIS deux actions da
 • Si le client demande où trouver le PDF ou le lien : réponds uniquement "Le bouton de téléchargement est disponible directement dans la carte de devis affichée dans notre conversation."
 • Hors périmètre → UNE seule phrase polie, rien de plus
 
-Réponds en français. Sois chaleureux, professionnel et concis.`
+Réponds en français. Sois chaleureux, professionnel et concis.
+N'utilise JAMAIS de formatage markdown (**, *, #, listes à puces, etc.). Texte brut uniquement.`
 
 // ── Niveau 2 : Pre-filter hors-sujet (avant d'appeler le LLM) ────────────────
 
