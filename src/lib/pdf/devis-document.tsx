@@ -10,7 +10,7 @@ export type DevisPdfData = {
   coefficients: { saisonnalite: number; capacite: number; delai: number }
   supplements:  { peages: number; nuit_chauffeur: number; guide: number }
   mode:         string
-  client?:      { prenom: string; nom: string; email?: string; telephone?: string }
+  client?:      { type_client: string; societe?: string; prenom?: string; nom?: string; email?: string; telephone?: string }
   numero?:      string
 }
 
@@ -193,7 +193,16 @@ export function DevisDocument({ data }: { data: DevisPdfData }) {
             <Text style={S.clientLabel}>A l'attention de</Text>
             {client ? (
               <>
-                <Text style={S.clientName}>{client.prenom} {client.nom}</Text>
+                <Text style={S.clientName}>
+                  {client.societe
+                    ? client.societe
+                    : client.prenom || client.nom
+                      ? `${client.prenom ?? ''} ${client.nom ?? ''}`.trim()
+                      : client.type_client.charAt(0).toUpperCase() + client.type_client.slice(1)}
+                </Text>
+                {(client.prenom || client.nom) && client.societe && (
+                  <Text style={S.clientSub}>{`${client.prenom ?? ''} ${client.nom ?? ''}`.trim()}</Text>
+                )}
                 {client.telephone && <Text style={S.clientSub}>Tel : {client.telephone}</Text>}
                 {client.email     && <Text style={S.clientSub}>{client.email}</Text>}
               </>
