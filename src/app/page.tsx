@@ -1,9 +1,42 @@
 import Link from 'next/link'
 
 const FEATURES = [
-  { icon: '⚡', title: 'Calcul instantané',   desc: 'Devis généré en quelques secondes, sans attendre un commercial.' },
-  { icon: '📊', title: 'Prix déterministe',   desc: 'Saisonnalité, capacité, délai, péages — tout est calculé automatiquement.' },
-  { icon: '📄', title: 'Devis PDF',           desc: 'Téléchargez un devis professionnel en un clic, prêt à envoyer.' },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    title: 'Calcul instantané',
+    desc: 'Devis généré en quelques secondes — distance, saisonnalité et péages inclus.',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    title: 'Prix déterministe',
+    desc: 'Saisonnalité, capacité, délai, péages — chaque paramètre est calculé automatiquement.',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+    title: 'Devis PDF',
+    desc: 'Téléchargez un devis professionnel en un clic, prêt à envoyer à votre client.',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
+        <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z" />
+      </svg>
+    ),
+    title: 'Réponse en 24 h',
+    desc: 'Un devis clair et rapide, sans engagement de votre part.',
+  },
 ]
 
 const DESTINATIONS = [
@@ -33,26 +66,59 @@ const IMG_SIZES:  Record<string, string> = { lg: 'h-24', md: 'h-20', sm: 'h-[72p
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#080808' }}>
+    <div className="min-h-screen flex flex-col">
 
-      {/* Nav */}
-      <nav className="px-8 py-5 flex items-center justify-between border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-black font-bold text-sm" style={{ background: '#c8ff00' }}>N</div>
-          <span className="text-white font-bold text-lg font-display">NeoTravel</span>
-          <span className="text-white/20 text-xs uppercase tracking-widest ml-1 font-display">B2B</span>
-        </div>
-        <Link
-          href="/chat"
-          className="text-black text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:opacity-90"
-          style={{ background: '#c8ff00' }}
-        >
-          Accéder à l&apos;assistant
-        </Link>
-      </nav>
+      {/* ── Hero (gradient indigo) ── */}
+      <div
+        className="relative flex flex-col overflow-hidden"
+        style={{ background: 'linear-gradient(120deg, #4220ad, #5a2bd9 60%, #6c40e6)', minHeight: '820px' }}
+      >
+        {/* Halo lime en bas à droite */}
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            right: '-80px', bottom: '-120px',
+            width: '420px', height: '420px', borderRadius: '50%',
+            background: 'radial-gradient(circle, #c8db1a, transparent 62%)',
+            opacity: 0.45,
+          }}
+        />
 
-      {/* Hero */}
-      <main className="flex-1 relative flex flex-col items-center justify-center px-6 text-center py-24 min-h-[900px] overflow-hidden">
+        {/* Nav */}
+        <nav className="relative z-10 px-8 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm"
+              style={{ background: '#c8db1a', color: '#1e1e32', fontFamily: 'Poppins, sans-serif' }}
+            >
+              N
+            </div>
+            <div>
+              <span className="font-display text-white font-bold text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Neo<span style={{ color: '#c8db1a' }}>Travel</span>
+              </span>
+              <span
+                className="block text-xs"
+                style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}
+              >
+                Location autocar · devis instantané
+              </span>
+            </div>
+          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 transition-all hover:-translate-y-px"
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              background: 'rgba(255,255,255,0.12)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.22)',
+              borderRadius: '999px',
+            }}
+          >
+            Dashboard
+          </Link>
+        </nav>
 
         {/* Cartes destinations flottantes */}
         {DESTINATIONS.map((dest) => (
@@ -66,99 +132,140 @@ export default function LandingPage() {
             }}
           >
             <div
-              className={`animate-float bg-white rounded-2xl overflow-hidden shadow-2xl ${CARD_SIZES[dest.size]}`}
-              style={{ animationDelay: `${dest.delay}s`, animationDuration: `${dest.duration}s` }}
+              className={`animate-float bg-white overflow-hidden shadow-2xl ${CARD_SIZES[dest.size]}`}
+              style={{
+                borderRadius: '18px',
+                boxShadow: '0 30px 70px -30px rgba(30,30,50,.45)',
+                animationDelay: `${dest.delay}s`,
+                animationDuration: `${dest.duration}s`,
+              }}
             >
               <img src={dest.img} alt={dest.city} className={`w-full ${IMG_SIZES[dest.size]} object-cover`} />
               <div className="px-3 py-2">
-                <p className="text-xs font-bold text-slate-800 truncate">{dest.city}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{dest.country}</p>
+                <p className="text-xs font-bold truncate" style={{ fontFamily: 'Poppins, sans-serif', color: '#1e1e32' }}>{dest.city}</p>
+                <p className="text-xs mt-0.5 truncate" style={{ color: '#6e6e82', fontSize: '10px' }}>{dest.country}</p>
               </div>
             </div>
           </div>
         ))}
 
-        {/* Contenu hero */}
-        <div className="relative z-10 flex flex-col items-center">
+        {/* Hero content */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 border text-xs font-medium px-4 py-1.5 rounded-full mb-8 font-display" style={{ borderColor: '#c8ff00', color: '#c8ff00', background: 'rgba(200,255,0,0.06)' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#c8ff00' }} />
+          <div
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest px-4 py-2 mb-8"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              borderRadius: '999px',
+              color: '#e6f06b',
+              letterSpacing: '0.14em',
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#c8db1a' }} />
             Powered by NeoTravel AI v2.1
           </div>
 
           {/* Titre */}
-          <h1 className="font-display text-5xl font-bold text-white leading-tight max-w-2xl">
-            Votre devis autocar{' '}
-            <span style={{ color: '#c8ff00' }}>en quelques secondes</span>
+          <h1
+            className="text-white font-display leading-tight max-w-2xl"
+            style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(30px,5vw,52px)', lineHeight: 1.05 }}
+          >
+            Établissons votre devis<br />
+            <span style={{ color: '#c8db1a' }}>gratuitement et rapidement</span>
           </h1>
 
-          <p className="text-white/50 text-lg mt-6 max-w-xl leading-relaxed">
+          <p
+            className="mt-6 max-w-xl leading-relaxed"
+            style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', color: 'rgba(255,255,255,0.82)' }}
+          >
             Décrivez simplement votre trajet à notre assistant IA. Il calcule instantanément
-            votre devis, distance, saisonnalité, péages inclus.
+            votre devis — distance, saisonnalité, péages inclus.
           </p>
 
           {/* CTA */}
           <div className="mt-10">
             <Link
               href="/chat"
-              className="inline-flex items-center gap-3 text-black font-bold px-10 py-5 rounded-2xl text-lg transition-all hover:opacity-90 hover:-translate-y-0.5"
-              style={{ background: '#c8ff00' }}
+              className="inline-flex items-center gap-2.5 font-semibold px-10 py-5 transition-all hover:-translate-y-px"
+              style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                fontSize: '16px',
+                background: '#5a2bd9',
+                color: '#fff',
+                borderRadius: '999px',
+                boxShadow: '0 10px 22px -10px #5a2bd9',
+              }}
             >
-              Démarrer avec l&apos;assistant
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-5 h-5">
+                <path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" />
               </svg>
+              Démarrer avec l&apos;assistant
             </Link>
           </div>
+        </div>
+      </div>
 
-          {/* Mockup chat */}
-          <div className="mt-16 w-full max-w-2xl rounded-2xl p-4 text-left border" style={{ background: '#111', borderColor: '#1e1e1e' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(200,255,0,0.5)' }} />
-              <span className="text-white/20 text-xs ml-2 font-display">NeoTravel AI</span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center text-black text-[10px] font-bold shrink-0 mt-0.5 font-display" style={{ background: '#c8ff00' }}>AI</div>
-                <div className="rounded-xl rounded-tl-sm px-3 py-2 text-sm text-white/70 max-w-xs" style={{ background: '#1a1a1a' }}>
-                  Bonjour ! Décrivez votre trajet et je calcule votre devis instantanément.
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <div className="rounded-xl rounded-tr-sm px-3 py-2 text-sm text-white max-w-xs" style={{ background: '#222' }}>
-                  Paris → Lyon, 30 passagers, le 15 septembre
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center text-black text-[10px] font-bold shrink-0 mt-0.5 font-display" style={{ background: '#c8ff00' }}>AI</div>
-                <div className="rounded-xl rounded-tl-sm px-3 py-2 text-sm text-white/70 max-w-xs" style={{ background: '#1a1a1a' }}>
-                  Devis calculé ✓ —{' '}
-                  <span className="font-semibold" style={{ color: '#c8ff00' }}>1 248 € TTC</span>
-                  {' '}pour Paris → Lyon, 30 pax, 15 sept.
-                </div>
-              </div>
-            </div>
+      {/* ── Section features (fond clair) ── */}
+      <section style={{ background: '#f8f8fc', borderTop: '1px solid #e6e6ee' }}>
+        <div className="max-w-5xl mx-auto px-6 py-20">
+
+          <div className="text-center mb-12">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ fontFamily: 'Inter, sans-serif', color: '#6e6e82', letterSpacing: '0.14em' }}
+            >
+              Pourquoi NeoTravel
+            </p>
+            <h2
+              className="font-display"
+              style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '30px', color: '#1e1e32' }}
+            >
+              Tout pour votre devis autocar
+            </h2>
           </div>
 
-          {/* Features */}
-          <div className="mt-16 grid grid-cols-3 gap-4 w-full max-w-2xl">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
             {FEATURES.map(({ icon, title, desc }) => (
-              <div key={title} className="rounded-2xl p-5 text-left border" style={{ background: '#111', borderColor: '#1e1e1e' }}>
-                <span className="text-2xl">{icon}</span>
-                <p className="text-white font-semibold text-sm mt-3 font-display">{title}</p>
-                <p className="text-white/40 text-xs mt-1.5 leading-relaxed">{desc}</p>
+              <div
+                key={title}
+                className="bg-white text-left p-6 transition-all hover:-translate-y-1"
+                style={{
+                  border: '1.5px solid #e6f06b',
+                  borderRadius: '22px',
+                  boxShadow: '0 18px 40px -18px rgba(30,30,50,.12)',
+                }}
+              >
+                <div
+                  className="w-12 h-12 flex items-center justify-center mb-4"
+                  style={{ background: '#f3eefc', borderRadius: '14px', color: '#5a2bd9' }}
+                >
+                  {icon}
+                </div>
+                <h4
+                  className="font-display mb-2"
+                  style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '15px', color: '#1e1e32' }}
+                >
+                  {title}
+                </h4>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: '#6e6e82' }}>
+                  {desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
-      </main>
+      </section>
 
       {/* Footer */}
-      <footer className="text-center py-5 text-xs border-t font-display" style={{ color: '#ffffff30', borderColor: '#1e1e1e' }}>
-        © 2025 NeoTravel · Tous droits réservés
+      <footer
+        className="text-center py-6 text-sm border-t"
+        style={{ fontFamily: 'Inter, sans-serif', color: '#6e6e82', borderColor: '#e6e6ee', background: '#f8f8fc' }}
+      >
+        © 2025 <strong style={{ color: '#1e1e32' }}>NeoTravel</strong> · Tous droits réservés
       </footer>
     </div>
   )

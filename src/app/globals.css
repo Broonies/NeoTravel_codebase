@@ -1,19 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --lime: #c8ff00;
-  --bg:   #080808;
+  --indigo-700: #4220ad;
+  --indigo-600: #5a2bd9;
+  --indigo-400: #8d6ee8;
+  --indigo-100: #e7defb;
+  --indigo-50:  #f3eefc;
+  --lime-500:   #b6c800;
+  --lime-400:   #c8db1a;
+  --lime-200:   #e6f06b;
+  --lime-50:    #f7fadb;
+  --ink-900:    #1e1e32;
+  --ink-700:    #36364f;
+  --slate-500:  #6e6e82;
+  --slate-300:  #a8a8ba;
+  --line-200:   #e6e6ee;
+  --bg-soft:    #f8f8fc;
+  --white:      #ffffff;
+  --r-sm:       8px;
+  --r-md:       14px;
+  --r-lg:       22px;
+  --r-pill:     999px;
+  --shadow-card:   0 18px 40px -18px rgba(30,30,50,.22);
+  --shadow-float:  0 30px 70px -30px rgba(30,30,50,.35);
 }
+
+* { box-sizing: border-box; }
 
 body {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
-  background: var(--bg);
-  color: white;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink-700);
+  background: var(--bg-soft);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
-.font-display {
-  font-family: 'Space Mono', 'Courier New', monospace;
+h1, h2, h3, h4, .font-display {
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink-900);
+  letter-spacing: -0.02em;
 }
 
 @keyframes float {
