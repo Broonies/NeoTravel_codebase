@@ -40,7 +40,6 @@ export interface EscaladeHumaine {
   nb_passagers:     number
   commentaire:      string | null
   score_completude: number | null
-  created_at:       string
   lead: { prenom: string; nom: string; email: string; telephone: string }
 }
 
@@ -88,9 +87,9 @@ export async function getEscaladesHumaines(): Promise<EscaladeHumaine[]> {
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('demandes')
-    .select('id, ville_depart, ville_arrivee, date_depart, nb_passagers, commentaire, score_completude, created_at, leads(prenom, nom, email, telephone)')
+    .select('id, ville_depart, ville_arrivee, date_depart, nb_passagers, commentaire, score_completude, leads(prenom, nom, email, telephone)')
     .eq('type_statut', 'cas_complexe')
-    .order('created_at', { ascending: false })
+    .order('date_depart', { ascending: true })
 
   if (error || !data) return []
 
