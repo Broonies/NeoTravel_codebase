@@ -3,9 +3,9 @@ import { notFound, redirect } from 'next/navigation'
 import { getDossierComplet, updateDevisStatut } from '../../actions'
 
 const URGENCE_LABELS: Record<string, string> = {
-  DD_PRIORITAIRE: '🔴 Prioritaire (< 48h)',
-  DD_URGENT:      '🟠 Urgent (2–7 jours)',
-  DD_NORMAL:      '🟢 Normal',
+  DD_PRIORITAIRE: '🔴 Prioritaire (< 8j)',
+  DD_URGENT:      '🟠 Urgent (8–15 jours)',
+  DD_NORMAL:      '🟢 Normal (15–90 jours)',
   DD_3MOISETPLUS: '🔵 3 mois et +',
 }
 

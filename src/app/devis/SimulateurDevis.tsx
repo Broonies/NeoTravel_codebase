@@ -105,7 +105,6 @@ export default function DevisForm() {
             Simulateur de devis
           </h1>
           <p className="mt-1" style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#6e6e82' }}>
-            Calcul déterministe · distance + péages via HERE Routing API
           </p>
         </div>
 
