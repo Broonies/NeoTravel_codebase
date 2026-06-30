@@ -123,7 +123,7 @@ Prix TTC = (prix_base × (1 + coeff_saison + coeff_capacité + coeff_délai) + s
 - `DD_NORMAL` : 15–90 j (-5%)
 - `DD_3MOISETPLUS` : > 90 j (-10%)
 
-Les demandes < 48 h sont techniquement PRIORITAIRE ; l'escalade HITL peut être déclenchée manuellement si nécessaire.
+Les demandes < 48 h tombent dans la tranche PRIORITAIRE (0–7 j) — pas d'escalade HITL automatique pour ce seul critère.
 
 ---
 

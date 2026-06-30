@@ -57,7 +57,7 @@ export function TabNav({ currentTab, notifCount }: Props) {
             <Link
               key={key}
               href={key === "overview" ? "/dashboard" : `/dashboard?tab=${key}`}
-              className="flex items-center gap-2 px-4 py-2 text-sm transition-all"
+              className="flex items-center gap-2.5 px-4 py-2 text-sm transition-all"
               style={{
                 fontFamily:  "Inter, sans-serif",
                 fontWeight:  active ? 600 : 400,
@@ -87,7 +87,7 @@ export function TabNav({ currentTab, notifCount }: Props) {
               {label}
               {hasAlert && (
                 <span
-                  className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{
                     background: active ? "rgba(255,255,255,0.22)" : "#fff5f5",
                     color:      active ? "#fff" : "#e11d48",
