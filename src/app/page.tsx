@@ -26,7 +26,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Devis PDF',
-    desc: 'Téléchargez un devis professionnel en un clic, prêt à envoyer à votre client.',
+    desc: 'Téléchargez un devis professionnel en un clic',
   },
   {
     icon: (
@@ -34,8 +34,8 @@ const FEATURES = [
         <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z" />
       </svg>
     ),
-    title: 'Réponse en 24 h',
-    desc: 'Un devis clair et rapide, sans engagement de votre part.',
+    title: 'Réponse immédiate ou en 24 h par nos conseillers',
+    desc: 'Un devis clair et rapide, selon vos conditions',
   },
 ]
 
