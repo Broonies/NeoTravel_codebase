@@ -537,7 +537,7 @@ export default function ChatUI() {
               placeholder="Ex : Paris → Lyon, 40 passagers…"
               disabled={status !== 'ready'}
               className="flex-1 text-sm disabled:opacity-40"
-              style={{ background: '#f8f8fc', border: '1px solid #e6e6ee', borderRadius: '999px', padding: '12px 16px sm:20px', color: '#1e1e32', fontFamily: 'Inter, sans-serif', outline: 'none' }}
+              style={{ background: '#f8f8fc', border: '1px solid #e6e6ee', borderRadius: '999px', padding: '12px 20px', color: '#1e1e32', fontFamily: 'Inter, sans-serif', outline: 'none' }}
             />
             <button
               type="submit"

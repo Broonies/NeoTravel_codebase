@@ -16,14 +16,14 @@ export type DevisPdfData = {
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
-const NAVY  = '#1E3A5F'
-const BLUE  = '#2563A8'
-const LBLUE = '#EBF4FF'
-const GRAY  = '#6B7280'
-const LGRAY = '#F9FAFB'
-const LINE  = '#E5E7EB'
-const WHITE = '#FFFFFF'
-const INK   = '#111827'
+const NAVY  = '#4220ad'  // --indigo-700
+const BLUE  = '#5a2bd9'  // --indigo-600
+const LBLUE = '#e7defb'  // --indigo-100
+const GRAY  = '#6e6e82'  // --slate-500
+const LGRAY = '#f8f8fc'  // --bg-soft
+const LINE  = '#e6e6ee'  // --line-200
+const WHITE = '#ffffff'
+const INK   = '#1e1e32'  // --ink-900
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -86,7 +86,7 @@ const S = StyleSheet.create({
   // Big TTC box
   ttcBox:       { backgroundColor: NAVY, margin: '0 32 0 32', padding: '16 24', borderRadius: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   ttcLabel:     { fontSize: 11, fontFamily: 'Helvetica-Bold', color: WHITE },
-  ttcSub:       { fontSize: 7.5, color: '#93C5FD', marginTop: 3 },
+  ttcSub:       { fontSize: 7.5, color: '#8d6ee8', marginTop: 3 },
   ttcValue:     { fontSize: 22, fontFamily: 'Helvetica-Bold', color: WHITE },
 
   // Ce devis comprend
