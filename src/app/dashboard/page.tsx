@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDossiersUrgents, getRelancesActives, type DossierUrgent, type RelanceActive } from "./actions";
+import { getEscaladesHumaines, getRelancesActives, type EscaladeHumaine, type RelanceActive } from "./actions";
 import { getDashboardKPIs } from "./lib/queries";
 import { DashboardCharts } from "./components/DashboardCharts";
 import { TabNav } from "./components/TabNav";
@@ -44,57 +44,36 @@ function KpiCard({ label, value, sub, accent, icon }: {
   );
 }
 
-// ── Verification Card (dossiers urgents) ──────────────────────────────────────
+// ── Escalade Card (cas_complexe HITL) ────────────────────────────────────────
 
-const URGENCE_CFG = {
-  DD_PRIORITAIRE: { label: "Prioritaire", dot: "#ef4444", bg: "#fff5f5", border: "#fecaca", text: "#e11d48" },
-  DD_URGENT:      { label: "Urgent",      dot: "#f97316", bg: "#fff7ed", border: "#fed7aa", text: "#f97316" },
-};
-
-function VerifCard({ d }: { d: DossierUrgent }) {
-  const cfg = URGENCE_CFG[d.urgence_code] ?? URGENCE_CFG.DD_URGENT;
+function EscaladeCard({ e }: { e: EscaladeHumaine }) {
   return (
     <Link
-      href={`/dashboard/dossier/${d.demande_id}`}
+      href={`/dashboard/dossier/${e.demande_id}`}
       className="flex items-center gap-4 p-4 bg-white transition-all hover:-translate-y-0.5"
-      style={{ border: `1px solid ${cfg.border}`, borderRadius: "14px", boxShadow: "0 8px 20px -8px rgba(30,30,50,.08)" }}
+      style={{ border: "1px solid #fecaca", borderRadius: "14px", boxShadow: "0 8px 20px -8px rgba(30,30,50,.08)" }}
     >
-      <div className="w-1.5 h-12 shrink-0" style={{ background: cfg.dot, borderRadius: "999px" }} />
+      <div className="w-1.5 shrink-0 self-stretch" style={{ background: "#e11d48", borderRadius: "999px" }} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span
             className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
-            style={{ background: cfg.bg, color: cfg.text, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}
+            style={{ background: "#fff5f5", color: "#e11d48", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}
           >
-            {cfg.label}
+            Escalade HITL
           </span>
           <span className="text-xs" style={{ color: "#6e6e82", fontFamily: "Inter, sans-serif" }}>
-            Départ : {fdate(d.date_depart)}
+            {e.nb_passagers} passagers · Départ {fdate(e.date_depart)}
           </span>
         </div>
         <p className="font-semibold text-sm truncate" style={{ fontFamily: "Poppins, sans-serif", color: "#1e1e32" }}>
-          {d.ville_depart} → {d.ville_arrivee}
+          {e.ville_depart} → {e.ville_arrivee}
         </p>
         <p className="text-xs mt-0.5 truncate" style={{ fontFamily: "Inter, sans-serif", color: "#6e6e82" }}>
-          {d.lead.prenom} {d.lead.nom} · {d.nb_passagers} passagers
+          {e.lead.prenom} {e.lead.nom}
+          {e.commentaire ? ` · ${e.commentaire}` : ""}
         </p>
       </div>
-      {d.score_completude !== null && (
-        <div className="shrink-0 text-center">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs"
-            style={{
-              background: d.score_completude >= 70 ? "#f3eefc" : "#fff5f5",
-              color:      d.score_completude >= 70 ? "#5a2bd9" : "#e11d48",
-              border:     `2px solid ${d.score_completude >= 70 ? "#e7defb" : "#fecaca"}`,
-              fontFamily: "Poppins, sans-serif",
-            }}
-          >
-            {d.score_completude}%
-          </div>
-          <p className="text-xs mt-1" style={{ color: "#a8a8ba", fontFamily: "Inter, sans-serif" }}>complétude</p>
-        </div>
-      )}
       <svg className="w-4 h-4 shrink-0" style={{ color: "#a8a8ba" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
       </svg>
@@ -198,13 +177,13 @@ export default async function DashboardPage({
 }) {
   const { tab = "overview" } = await searchParams;
 
-  const [kpis, dossiers, relances] = await Promise.all([
+  const [kpis, escalades, relances] = await Promise.all([
     getDashboardKPIs(),
-    getDossiersUrgents(),
+    getEscaladesHumaines(),
     getRelancesActives(),
   ]);
 
-  const notifCount = dossiers.length + relances.length;
+  const notifCount = escalades.length + relances.length;
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f8fc" }}>
@@ -284,10 +263,10 @@ export default async function DashboardPage({
                 icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
               />
               <KpiCard
-                label="Vérifications"
-                value={`${dossiers.length}`}
-                sub="intervention requise"
-                accent={dossiers.length > 0 ? "#e11d48" : undefined}
+                label="Escalades HITL"
+                value={`${escalades.length}`}
+                sub="intervention humaine requise"
+                accent={escalades.length > 0 ? "#e11d48" : undefined}
                 icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
               />
               <KpiCard
@@ -324,18 +303,18 @@ export default async function DashboardPage({
               </p>
             </div>
 
-            {/* ── Demandes de vérification ── */}
+            {/* ── Escalades humaines (cas_complexe) ── */}
             <NotifSection
-              title="Demandes de vérification"
-              sub="Intervention humaine requise"
-              count={dossiers.length}
+              title="Escalades humaines"
+              sub="Intervention humaine requise · &gt; 85 pax ou hors France"
+              count={escalades.length}
               accentColor="#e11d48"
             >
-              {dossiers.length === 0 ? (
-                <Empty label="Aucune demande de vérification en cours." />
+              {escalades.length === 0 ? (
+                <Empty label="Aucune escalade humaine en cours." />
               ) : (
                 <div className="space-y-3">
-                  {dossiers.map(d => <VerifCard key={d.demande_id} d={d} />)}
+                  {escalades.map(e => <EscaladeCard key={e.demande_id} e={e} />)}
                 </div>
               )}
             </NotifSection>

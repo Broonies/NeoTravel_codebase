@@ -32,6 +32,18 @@ export interface DossierComplet {
   } | null
 }
 
+export interface EscaladeHumaine {
+  demande_id:       number
+  ville_depart:     string
+  ville_arrivee:    string
+  date_depart:      string
+  nb_passagers:     number
+  commentaire:      string | null
+  score_completude: number | null
+  created_at:       string
+  lead: { prenom: string; nom: string; email: string; telephone: string }
+}
+
 export interface RelanceActive {
   devis_id:      number
   demande_id:    number
@@ -68,6 +80,32 @@ export async function getDossiersUrgents(): Promise<DossierUrgent[]> {
       score_completude: row.score_completude as number | null,
       created_at:       row.created_at as string,
       lead: lead as DossierUrgent['lead'],
+    }
+  })
+}
+
+export async function getEscaladesHumaines(): Promise<EscaladeHumaine[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from('demandes')
+    .select('id, ville_depart, ville_arrivee, date_depart, nb_passagers, commentaire, score_completude, created_at, leads(prenom, nom, email, telephone)')
+    .eq('type_statut', 'cas_complexe')
+    .order('created_at', { ascending: false })
+
+  if (error || !data) return []
+
+  return data.map((row: Record<string, unknown>) => {
+    const lead = Array.isArray(row.leads) ? row.leads[0] : row.leads
+    return {
+      demande_id:       row.id as number,
+      ville_depart:     row.ville_depart as string,
+      ville_arrivee:    row.ville_arrivee as string,
+      date_depart:      row.date_depart as string,
+      nb_passagers:     row.nb_passagers as number,
+      commentaire:      row.commentaire as string | null,
+      score_completude: row.score_completude as number | null,
+      created_at:       row.created_at as string,
+      lead: lead as EscaladeHumaine['lead'],
     }
   })
 }
