@@ -107,19 +107,21 @@ N'utilise JAMAIS de formatage markdown (**, *, #, listes à puces, etc.). Texte 
 
 // ── Niveau 2 : Pre-filter hors-sujet (avant d'appeler le LLM) ────────────────
 
+// Mots-clés hors-sujet — NE PAS mettre de sous-chaînes de mots métier :
+// 'sport' ⊂ 'transport', 'action' ⊂ 'association' → faux positifs critiques
 const HORS_SUJET_KEYWORDS = [
   // Sujets clairement non liés
   'météo', 'température', 'pluie', 'soleil',
   'recette', 'cuisine', 'restaurant', 'gastronomie',
-  'football', 'rugby', 'tennis', 'sport', 'match', 'score',
+  'football', 'rugby', 'tennis', 'match', 'score',
   'politique', 'élection', 'président', 'gouvernement', 'loi', 'parlement',
   'médecine', 'docteur', 'médicament', 'santé', 'maladie', 'hôpital',
-  'bitcoin', 'crypto', 'bourse', 'action', 'investissement', 'finance',
+  'bitcoin', 'crypto', 'bourse', 'investissement',
   'javascript', 'python', 'html', 'css', 'code informatique', 'programmer',
   'poème', 'blague', 'histoire drôle',
   'traduction', 'traduire',
   // Autres modes de transport (hors-périmètre)
-  'avion', 'vol ', 'aéroport', 'billet d\'avion',
+  'avion', 'aéroport', "billet d'avion",
   'hôtel', 'hébergement', 'airbnb',
   'croisière', 'bateau',
 ]
@@ -129,7 +131,11 @@ const MSG_HORS_SUJET =
 
 function isHorsSujet(message: string): boolean {
   const lower = message.toLowerCase()
-  return HORS_SUJET_KEYWORDS.some((kw) => lower.includes(kw))
+  return HORS_SUJET_KEYWORDS.some((kw) => {
+    // Word-boundary matching : évite 'sport' ⊂ 'transport', 'loi' ⊂ 'exploitation', etc.
+    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`(?<![a-zàâäéèêëîïôöùûüç])${escaped}(?![a-zàâäéèêëîïôöùûüç])`, 'i').test(lower)
+  })
 }
 
 function staticResponse(text: string): Response {
